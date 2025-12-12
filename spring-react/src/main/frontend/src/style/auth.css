@@ -1,0 +1,263 @@
+/* 기본 리셋 */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --primary: #2f855a;      /* 메인 상단의 책 사이트 느낌 나는 녹색 계열 */
+    --primary-soft: #e6f4ec;
+    --bg: #f5f5f7;
+    --white: #ffffff;
+    --text-main: #222222;
+    --text-sub: #666666;
+    --border: #e1e1e1;
+    --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.07);
+    --radius-lg: 18px;
+    --radius-md: 10px;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Noto Sans KR", sans-serif;
+    background-color: var(--bg);
+    color: var(--text-main);
+}
+
+/* 상단 헤더 – 기존 메인과 비슷한 느낌 */
+.site-header {
+    background-color: var(--white);
+    border-bottom: 1px solid var(--border);
+}
+
+.header-inner {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    text-decoration: none;
+    color: var(--text-main);
+}
+
+.header-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: var(--text-sub);
+}
+
+.nav-link--active {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.divider {
+    color: #c4c4c4;
+}
+
+/* 메인 레이아웃 */
+.auth-body {
+    min-height: 100vh;
+}
+
+.auth-main {
+    max-width: 1040px;
+    margin: 40px auto;
+    padding: 0 16px 40px;
+}
+
+.auth-layout {
+    display: flex;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background-color: var(--white);
+    box-shadow: var(--shadow-soft);
+}
+
+/* 왼쪽 도서관 이미지 영역 */
+.auth-hero {
+    flex: 1.1;
+    min-height: 380px;
+    background-image:
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.5)),
+        url("https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=1000&q=80");
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.auth-hero-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px 32px;
+    color: #ffffff;
+}
+
+.hero-subtitle {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-bottom: 8px;
+}
+
+.hero-title {
+    font-size: 22px;
+    line-height: 1.5;
+    font-weight: 600;
+}
+
+/* 오른쪽 폼 영역 */
+.auth-panel {
+    flex: 1;
+    padding: 40px 40px 36px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.auth-title {
+    font-size: 22px;
+    margin-bottom: 8px;
+}
+
+.auth-description {
+    font-size: 13px;
+    color: var(--text-sub);
+    margin-bottom: 24px;
+}
+
+/* 폼 */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-field label {
+    font-size: 13px;
+    color: var(--text-sub);
+}
+
+.form-field input {
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-field input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(47, 133, 90, 0.15);
+}
+
+.form-extra-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--text-sub);
+}
+
+.checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.checkbox input {
+    width: 14px;
+    height: 14px;
+}
+
+/* 버튼 */
+.auth-button {
+    margin-top: 10px;
+    border-radius: 999px;
+    border: none;
+    padding: 11px 16px;
+    font-size: 15px;
+    font-weight: 600;
+    background-color: var(--primary);
+    color: #ffffff;
+    cursor: pointer;
+    transition: filter 0.15s ease, transform 0.05s ease;
+}
+
+.auth-button:hover {
+    filter: brightness(0.96);
+}
+
+.auth-button:active {
+    transform: translateY(1px);
+}
+
+/* 하단 텍스트 */
+.auth-meta {
+    margin-top: 18px;
+    font-size: 13px;
+    color: var(--text-sub);
+}
+
+.link-main {
+    margin-left: 4px;
+    text-decoration: none;
+    color: var(--primary);
+    font-weight: 500;
+}
+
+.link-main:hover,
+.link-small:hover {
+    text-decoration: underline;
+}
+
+.link-small {
+    text-decoration: none;
+    color: var(--text-sub);
+}
+
+/* 반응형 – 모바일에서 한 컬럼 레이아웃 */
+@media (max-width: 768px) {
+    .auth-main {
+        margin-top: 24px;
+    }
+
+    .auth-layout {
+        flex-direction: column;
+    }
+
+    .auth-hero {
+        min-height: 220px;
+    }
+
+    .auth-panel {
+        padding: 28px 20px 24px;
+    }
+}
