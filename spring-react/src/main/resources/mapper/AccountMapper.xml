@@ -23,7 +23,15 @@
                )
     </insert>
 
-<!--    &lt;!&ndash;   유저 로그인 DB 쿼리, 받아올 매개변수는 UserVO, 내보낼 반환 타입은 Int(insert는 자동 int) &ndash;&gt;-->
+        <!--    회원가입 시 기존에 가입한 아이디가 있는 지 체크-->
+        <select id="isLoginIdExistDB" resultType="int">
+            SELECT COUNT(*)
+            FROM USERS
+            WHERE LOGIN_ID = #{loginId}
+        </select>
+
+
+    <!--    &lt;!&ndash;   유저 로그인 DB 쿼리, 받아올 매개변수는 UserVO, 내보낼 반환 타입은 Int(insert는 자동 int) &ndash;&gt;-->
 <!--    <select id="userLoginDB" parameterType="UserVO" resultType="int">-->
 <!--        SELECT COUNT(*)-->
 <!--        FROM USERS-->
@@ -41,13 +49,6 @@
 <!--    &lt;!&ndash;    세션에 넣을 AUTH만 조회 후 반환&ndash;&gt;-->
 <!--    <select id="findAuthForSessionDB" resultType="String">-->
 <!--        SELECT AUTH-->
-<!--        FROM USERS-->
-<!--        WHERE LOGIN_ID = #{loginId}-->
-<!--    </select>-->
-
-<!--    &lt;!&ndash;    회원가입 시 기존에 가입한 아이디가 있는 지 체크&ndash;&gt;-->
-<!--    <select id="isLoginIdExistDB" resultType="int">-->
-<!--        SELECT COUNT(*)-->
 <!--        FROM USERS-->
 <!--        WHERE LOGIN_ID = #{loginId}-->
 <!--    </select>-->

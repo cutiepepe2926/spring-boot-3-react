@@ -18,4 +18,9 @@ public class AccountServiceImpl implements AccountService {
         return accountMapper.userRegisterDB(usersVO);
     }
 
+    // 회원가입 아이디 중복 체크 서비스
+    @Override
+    public int isLoginIdExist(String loginId) {
+        return accountMapper.isLoginIdExistDB(loginId);
+    }
 }

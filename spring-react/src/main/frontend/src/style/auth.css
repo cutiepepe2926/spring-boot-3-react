@@ -243,6 +243,16 @@ body {
     color: var(--text-sub);
 }
 
+/* 회원가입 중복 체크 버튼 스타일 */
+.dup-check-btn {
+    border-radius: 9999px; /* 완전 둥글게(알약 모양) */
+    padding: 10px 14px;
+    border: 1px solid #ccc;
+    background: #fff;
+    cursor: pointer;
+}
+
+
 /* 반응형 – 모바일에서 한 컬럼 레이아웃 */
 @media (max-width: 768px) {
     .auth-main {

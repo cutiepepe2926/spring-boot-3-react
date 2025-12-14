@@ -13,6 +13,10 @@ function SignupPage() {
         agree: false,
     });
 
+    // 중복체크 완료 여부 + 체크한 아이디 저장
+    const [idChecked, setIdChecked] = useState(false);
+    const [checkedIdValue, setCheckedIdValue] = useState("");
+
     // 정규식
     const ID_REGEX = /^[A-Za-z0-9]{4,20}$/;            // 아이디: 4~20자(영문/숫자)
     const NAME_REGEX = /^[가-힣]+$/;                    // 이름: 한글만
@@ -20,6 +24,12 @@ function SignupPage() {
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
+
+        // 아이디가 바뀌면 중복체크 무효화
+        if (name === "id") {
+            setIdChecked(false);
+            setCheckedIdValue("");
+        }
 
         // 전화번호는 숫자만 입력되게 + 자동 하이픈 적용
         if (name === "phone") {
@@ -44,8 +54,45 @@ function SignupPage() {
         }));
     };
 
+    // 아이디 중복 체크 버튼 클릭 시 동작
+    const handleCheckDuplicateId = async (e) => {
+        e.preventDefault();
+
+        // 아이디 형식 먼저 체크 (선택)
+        if (!ID_REGEX.test(form.id)) {
+            alert("아이디는 4~20자, 영문/숫자만 가능합니다.");
+            return;
+        }
+
+        // 아이디 중복 체크 API 연동
+        const payload = {
+            loginId: form.id,
+        };
+
+        try {
+            await axios.post("/api/auth/v1/idCheck", payload);
+            // 서버가 200이면 사용 가능
+            alert("아이디 사용 가능!");
+
+            setIdChecked(true);
+            setCheckedIdValue(form.id); // 이 아이디로 체크 완료
+        } catch (e) {
+            const msg = e.response?.data ?? "해당 아이디는 이미 존재합니다.";
+            alert(msg);
+            setIdChecked(false);
+            setCheckedIdValue("");
+        }
+    };
+
+    // 회원가입 버튼 클릭 시 동작
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // 중복체크 통과 안 했으면 가입 불가
+        if (!idChecked || checkedIdValue !== form.id) {
+            alert("아이디 중복체크를 먼저 완료해주세요.");
+            return;
+        }
 
         // 아이디 길이(4~20) + 형식
         if (!ID_REGEX.test(form.id)) {
@@ -125,15 +172,24 @@ function SignupPage() {
                 <form className="auth-form" onSubmit={handleSubmit}>
                     <div className="form-field">
                         <label htmlFor="signup-id">아이디</label>
-                        <input
-                            id="signup-id"
-                            name="id"
-                            type="text"
-                            placeholder="아이디는 4글자 이상 입력해주세요."
-                            required
-                            value={form.id}
-                            onChange={handleChange}
-                        />
+                        <div style={{ display: "flex", gap: "8px"}}>
+                            <input
+                                id="signup-id"
+                                name="id"
+                                type="text"
+                                placeholder="아이디는 4글자 이상 입력해주세요."
+                                required
+                                value={form.id}
+                                onChange={handleChange}
+                                style={{ flex: 1 }}
+                            />
+                            <button
+                                type="button"
+                                className="dup-check-btn"
+                                onClick={handleCheckDuplicateId}>
+                                중복체크
+                            </button>
+                        </div>
                     </div>
 
                     <div className="form-field">
@@ -214,7 +270,15 @@ function SignupPage() {
                         </label>
                     </div>
 
-                    <button type="submit" className="auth-button">
+                    <button
+                        type="submit"
+                        className="auth-button"
+                        disabled={!idChecked || checkedIdValue !== form.id}
+                        style={{
+                            opacity: (!idChecked || checkedIdValue !== form.id) ? 0.5 : 1,
+                            cursor: (!idChecked || checkedIdValue !== form.id) ? "not-allowed" : "pointer",
+                        }}
+                    >
                         회원가입 완료
                     </button>
                 </form>
