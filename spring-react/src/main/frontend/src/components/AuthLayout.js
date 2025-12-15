@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
-import AuthHeader from "../component/AuthHeader";
-import LoginPage from "../component/LoginPage";
-import RegisterPage from "../component/RegisterPage";
+import AuthHeader from "../components/AuthHeader";
+import LoginPage from "../components/LoginPage";
+import RegisterPage from "../components/RegisterPage";
 
 import "../style/auth.css";
 
@@ -19,10 +19,8 @@ function AuthLayout() {
             <AuthHeader />
             <main className="auth-main">
                 <Routes>
-                    {/* /auth 로 들어오면 /auth/login 으로 */}
-                    <Route path="/" element={<Navigate to="login" replace />} />
                     <Route path="login" element={<LoginPage />} />
-                    <Route path="signup" element={<RegisterPage />} />
+                    <Route path="register" element={<RegisterPage />} />
                 </Routes>
             </main>
         </>

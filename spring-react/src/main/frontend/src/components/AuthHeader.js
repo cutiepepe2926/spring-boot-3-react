@@ -6,12 +6,12 @@ function Header() {
     return (
         <header className="site-header">
             <div className="header-inner">
-                <NavLink to="/login" className="logo">
+                <NavLink to="/" className="logo">
                     책의 온도
                 </NavLink>
                 <nav className="header-nav">
                     <NavLink
-                        to="/login"
+                        to="/auth/login"
                         className={({ isActive }) =>
                             "nav-link" + (isActive ? " nav-link--active" : "")
                         }
@@ -20,7 +20,7 @@ function Header() {
                     </NavLink>
                     <span className="divider">|</span>
                     <NavLink
-                        to="/signup"
+                        to="/auth/register"
                         className={({ isActive }) =>
                             "nav-link" + (isActive ? " nav-link--active" : "")
                         }

@@ -30,8 +30,8 @@ function Main() {
             <button className="header-btn" onClick={() => navigate("/chat")}>
               채팅방
             </button>
-            <button className="header-btn">로그인</button>
-            <button className="header-btn signup">회원가입</button>
+            <button className="header-btn" onClick={() => navigate("/auth/login")}>로그인</button>
+            <button className="header-btn signup" onClick={() => navigate("/auth/register")}>회원가입</button>
           </div>
         </header>
 
