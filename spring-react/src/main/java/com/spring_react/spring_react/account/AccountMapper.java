@@ -11,4 +11,7 @@ public interface AccountMapper {
 
     // 회원가입 아이디 중복 체크
     int isLoginIdExistDB(String loginId);
+
+    // 유저 로그인
+    int userLoginDB(UsersVO usersVO);
 }

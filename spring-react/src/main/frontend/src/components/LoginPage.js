@@ -5,7 +5,7 @@ import axios from "axios";
 function LoginPage() {
     const [form, setForm] = useState({
         id: "",
-        password: "",
+        pw: "",
         remember: false,
     });
 
@@ -23,13 +23,21 @@ function LoginPage() {
         // TODO: 실제 로그인 API 연동
         const payload = {
             loginId: form.id,
-            pw: form.password
+            pw: form.pw
         }
 
         try {
-            await axios.post.name("/api/auth/v1/login", payload);
+            const res = await axios.post("/api/auth/v1/login", payload);
+
+            const accessToken = res.data?.accessToken;
+            if (!accessToken) throw new Error("토큰이 응답에 없습니다.");
+
+            // Access만 쓰는 상태: 일단 저장(추후 remember에 따라 분기 가능)
+            if (form.remember) localStorage.setItem("accessToken", accessToken);
+            else sessionStorage.setItem("accessToken", accessToken);
+
             alert("로그인 성공!");
-            //window.location.href = "";
+            window.location.href = "/";
 
             //나중에 추가처리필요
 
@@ -79,12 +87,12 @@ function LoginPage() {
                     <div className="form-field">
                         <label htmlFor="login-password">비밀번호</label>
                         <input
-                            id="login-password"
-                            name="password"
+                            id="login-pw"
+                            name="pw"
                             type="password"
                             placeholder="비밀번호를 입력하세요"
                             required
-                            value={form.password}
+                            value={form.pw}
                             onChange={handleChange}
                         />
                     </div>

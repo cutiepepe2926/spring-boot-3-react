@@ -31,13 +31,13 @@
         </select>
 
 
-    <!--    &lt;!&ndash;   유저 로그인 DB 쿼리, 받아올 매개변수는 UserVO, 내보낼 반환 타입은 Int(insert는 자동 int) &ndash;&gt;-->
-<!--    <select id="userLoginDB" parameterType="UserVO" resultType="int">-->
-<!--        SELECT COUNT(*)-->
-<!--        FROM USERS-->
-<!--        WHERE LOGIN_ID = #{loginId}-->
-<!--          AND USER_PW = #{userPw}-->
-<!--    </select>-->
+        <!--   유저 로그인 DB 쿼리, 받아올 매개변수는 UserVO, 내보낼 반환 타입은 Int(insert는 자동 int) -->
+    <select id="userLoginDB" parameterType="UsersVO" resultType="int">
+        SELECT COUNT(*)
+        FROM USERS
+        WHERE LOGIN_ID = #{loginId}
+          AND PW = #{pw}
+    </select>
 
 <!--    &lt;!&ndash;    세션에 넣을 USER_ID만 조회 후 반환&ndash;&gt;-->
 <!--    <select id="findUserIdForSessionDB" resultType="int">-->
