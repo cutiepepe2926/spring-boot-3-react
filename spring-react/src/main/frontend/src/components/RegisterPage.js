@@ -139,7 +139,7 @@ function SignupPage() {
         try {
             await axios.post("/api/auth/v1/register", payload);
             alert("회원가입 성공!");
-            window.location.href = "/login";
+            window.location.href = "/auth/login";
         } catch (e) {
             const msg = e.response?.data ?? "회원가입 실패";
             alert(msg);
