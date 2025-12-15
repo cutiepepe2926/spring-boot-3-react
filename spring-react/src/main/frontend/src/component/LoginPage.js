@@ -1,9 +1,10 @@
 // src/pages/LoginPage.js
 import React, { useState } from "react";
+import axios from "axios";
 
 function LoginPage() {
     const [form, setForm] = useState({
-        email: "",
+        id: "",
         password: "",
         remember: false,
     });
@@ -16,10 +17,26 @@ function LoginPage() {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+
         // TODO: 실제 로그인 API 연동
-        console.log("로그인 요청 데이터:", form);
+        const payload = {
+            loginId: form.id,
+            pw: form.password
+        }
+
+        try {
+            await axios.post.name("/api/auth/v1/login", payload);
+            alert("로그인 성공!");
+            //window.location.href = "";
+
+            //나중에 추가처리필요
+
+        } catch (e) {
+            const msg = e.response?.data ?? "로그인 실패";
+            alert(msg);
+        }
     };
 
     return (
@@ -47,14 +64,14 @@ function LoginPage() {
 
                 <form className="auth-form" onSubmit={handleSubmit}>
                     <div className="form-field">
-                        <label htmlFor="login-email">이메일</label>
+                        <label htmlFor="login-id">아이디</label>
                         <input
-                            id="login-email"
-                            name="email"
-                            type="email"
-                            placeholder="example@bookwarm.com"
+                            id="login-id"
+                            name="id"
+                            type="text"
+                            placeholder="아이디"
                             required
-                            value={form.email}
+                            value={form.id}
                             onChange={handleChange}
                         />
                     </div>
@@ -82,13 +99,6 @@ function LoginPage() {
                             />
                             <span>로그인 상태 유지</span>
                         </label>
-                        {/*<button*/}
-                        {/*    type="button"*/}
-                        {/*    className="link-small"*/}
-                        {/*    style={{ border: "none", background: "none", padding: 0 }}*/}
-                        {/*>*/}
-                        {/*    비밀번호 찾기*/}
-                        {/*</button>*/}
                     </div>
 
                     <button type="submit" className="auth-button">
