@@ -86,20 +86,26 @@ function Main() {
             </div>
           </div>
 
-          <div className="book-list">
-            {bookList.map((book) => (
-              <div className="book-card" key={book.id}>
-                <img className="book-image" alt="책 이미지" />
-                <div className="book-info">
-                  <p className="book-title">{book.title}</p>
-                  <div className="book-meta">
-                    <span className="book-price">{book.price}</span>
-                    <span className="book-date">{book.date}</span>
-                  </div>
+        <div className="book-list">
+          {bookList.map((book) => (
+            <div
+              className="book-card"
+              key={book.id}
+              onClick={() => navigate(`/detail/${book.id}`)}
+              style={{ cursor: "pointer" }} // 클릭 가능 표시
+            >
+              <img className="book-image" alt="책 이미지" />
+              <div className="book-info">
+                <p className="book-title">{book.title}</p>
+                <div className="book-meta">
+                  <span className="book-price">{book.price}</span>
+                  <span className="book-date">{book.date}</span>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
+        </div>
+
 
           <div className="pagination">
             <button className="page-btn">{`<<`}</button>
