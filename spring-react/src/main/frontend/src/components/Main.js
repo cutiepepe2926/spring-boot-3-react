@@ -1,5 +1,7 @@
 import "./Main.css";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import api from "../api/api"
 
 function Main() {
     const navigate = useNavigate();

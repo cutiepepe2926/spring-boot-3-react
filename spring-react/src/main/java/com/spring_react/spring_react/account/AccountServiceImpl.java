@@ -23,4 +23,11 @@ public class AccountServiceImpl implements AccountService {
     public int isLoginIdExist(String loginId) {
         return accountMapper.isLoginIdExistDB(loginId);
     }
+
+    // 유저 로그인 서비스
+    @Override
+    public int userLogin(UsersVO usersVO) {
+        return accountMapper.userLoginDB(usersVO);
+    }
+
 }

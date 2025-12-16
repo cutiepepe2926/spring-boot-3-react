@@ -14,11 +14,10 @@ function Header() {
                         to="/auth/login"
                         className={({ isActive }) =>
                             "nav-link" + (isActive ? " nav-link--active" : "")
-                        }
-                    >
+                        }>
                         로그인
                     </NavLink>
-                    <span className="divider">|</span>
+                    <span>|</span>
                     <NavLink
                         to="/auth/register"
                         className={({ isActive }) =>

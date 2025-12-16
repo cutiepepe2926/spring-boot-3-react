@@ -1,8 +1,9 @@
-package com.spring_react.spring_react.account;
+package com.spring_react.spring_react.book;
 
 import com.spring_react.spring_react.command.BookVO;
-import com.spring_react.spring_react.mapper.BookMapper;
+import com.spring_react.spring_react.book.BookMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,7 +12,8 @@ import java.util.List;
 
 public class BookServiceImpl implements BookService {
 
-    private final BookMapper bookMapper;
+    @Autowired
+    private BookMapper bookMapper;
 
     @Override
     public List<BookVO> getBookList() {

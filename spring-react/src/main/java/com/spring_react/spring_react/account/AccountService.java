@@ -10,4 +10,7 @@ public interface AccountService {
     // 회원가입 아이디 중복 체크
     int isLoginIdExist(String loginId);
 
+    // 유저 로그인
+    int userLogin(UsersVO usersVO);
+
 }

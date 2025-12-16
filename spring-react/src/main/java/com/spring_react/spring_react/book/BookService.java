@@ -1,4 +1,4 @@
-package com.spring_react.spring_react.account;
+package com.spring_react.spring_react.book;
 
 import com.spring_react.spring_react.command.BookVO;
 

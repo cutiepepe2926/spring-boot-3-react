@@ -1,8 +1,8 @@
 CREATE TABLE users (
     user_id     INT NOT NULL AUTO_INCREMENT COMMENT '회원 고유 ID',
-    login_id    VARCHAR(50)  NOT NULL COMMENT '로그인 ID',             -- 고유값
-    password    VARCHAR(100) NOT NULL COMMENT '비밀번호(암호화 저장)',  -- 중복허용
-    name        VARCHAR(50)  NOT NULL COMMENT '이름',                   -- 중복허용
+    login_id    VARCHAR(255)  NOT NULL COMMENT '로그인 ID',             -- 고유값
+    pw    VARCHAR(255) NOT NULL COMMENT '비밀번호(암호화 저장)',  -- 중복허용
+    user_name        VARCHAR(50)  NOT NULL COMMENT '이름',                   -- 중복허용
     email       VARCHAR(100) NOT NULL COMMENT '이메일',                 -- 고유값
     phone       VARCHAR(20)  NOT NULL COMMENT '전화번호',               -- 고유값
     created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -13,6 +13,11 @@ CREATE TABLE users (
     UNIQUE KEY uk_users_email    (email),
     UNIQUE KEY uk_users_phone    (phone)
 );
+
+SELECT * FROM USERS;
+-- SET FOREIGN_KEY_CHECKS = 0;
+-- drop table users;
+-- SET FOREIGN_KEY_CHECKS = 1;
 
 CREATE TABLE book (
     book_id      INT NOT NULL AUTO_INCREMENT COMMENT '상품 ID',
