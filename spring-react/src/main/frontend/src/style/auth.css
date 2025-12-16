@@ -27,21 +27,6 @@ body {
     color: var(--text-main);
 }
 
-/* 상단 헤더 – 기존 메인과 비슷한 느낌 */
-.site-header {
-    background-color: var(--white);
-    border-bottom: 1px solid var(--border);
-}
-
-.header-inner {
-    max-width: 1040px;
-    margin: 0 auto;
-    padding: 14px 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
 .logo {
     font-size: 22px;
     font-weight: 700;
@@ -67,9 +52,6 @@ body {
     font-weight: 600;
 }
 
-.divider {
-    color: #c4c4c4;
-}
 
 /* 메인 레이아웃 */
 .auth-body {
@@ -252,6 +234,32 @@ body {
     cursor: pointer;
 }
 
+/* header-inner 폭/정렬 강제 (덮임 방지) */
+.site-header .header-inner {
+    display: flex !important;
+    width: 100% !important;              /* 핵심: 줄 전체 폭을 확보 */
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 5px 16px;
+
+    justify-content: space-between !important;
+    align-items: center !important;
+}
+
+/* 오른쪽 메뉴 간격 */
+.site-header .header-nav {
+    display: flex !important;
+    align-items: center !important;
+    gap: 16px !important;
+}
+
+/* | 구분자 여백 */
+.site-header .divider {
+    margin: 0 10px !important;
+    opacity: 0.6;
+}
+
+.site-header { position: static; }
 
 /* 반응형 – 모바일에서 한 컬럼 레이아웃 */
 @media (max-width: 768px) {
