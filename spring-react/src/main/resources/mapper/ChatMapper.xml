@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.spring_react.spring_react.chat.ChatMapper">
+
+    <!-- 채팅방 생성 -->
+    <insert id="insertChatRoom">
+        INSERT INTO chat_room (book_id, seller_id, buyer_id)
+        VALUES (#{param1}, #{param2}, #{param3})
+    </insert>
+
+    <!-- 채팅방 목록 -->
+    <select id="getChatRoomList" parameterType="long" resultType="ChatRoomVO">
+        SELECT
+            cr.room_id         AS roomId,
+            b.book_id          AS bookId,
+            b.title            AS productName,
+            b.price            AS productPrice,
+            b.status           AS productStatus,
+            u.user_name        AS otherUserName,
+            DATE_FORMAT(MAX(cm.sent_at), '%Y-%m-%d %H:%i') AS lastTime
+        FROM chat_room cr
+                 JOIN book b ON cr.book_id = b.book_id
+                 JOIN users u
+                      ON u.user_id = CASE
+                                         WHEN cr.seller_id = #{userId} THEN cr.buyer_id
+                                         ELSE cr.seller_id
+                          END
+                 LEFT JOIN chat_message cm ON cr.room_id = cm.room_id
+        WHERE cr.seller_id = #{userId}
+           OR cr.buyer_id  = #{userId}
+        GROUP BY cr.room_id
+        ORDER BY lastTime DESC
+    </select>
+
+    <!-- 채팅 메시지 목록 -->
+    <select id="getChatMessages" parameterType="long" resultType="ChatVO">
+        SELECT
+            message_id AS messageId,
+            room_id    AS roomId,
+            sender_id  AS senderId,
+            content,
+            sent_at    AS sentAt
+        FROM chat_message
+        WHERE room_id = #{roomId}
+        ORDER BY sent_at ASC
+    </select>
+
+    <!-- 메시지 전송 -->
+    <insert id="insertChatMessage" parameterType="ChatVO">
+        INSERT INTO chat_message (room_id, sender_id, content)
+        VALUES (#{roomId}, #{senderId}, #{content})
+    </insert>
+
+</mapper>
