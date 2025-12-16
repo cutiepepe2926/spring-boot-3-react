@@ -113,7 +113,7 @@ function Chat() {
           {/* ===== 왼쪽: 대화방 목록 ===== */}
           <aside className="chat-list">
             <div className="chat-list-header">
-              {/* 🔹 뒤로가기 버튼 */}
+              {/*  뒤로가기 버튼 */}
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <button
                   className="back-btn"
