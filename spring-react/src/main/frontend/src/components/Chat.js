@@ -1,241 +1,170 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import SockJS from "sockjs-client";
+import api from "../api/api";
 import "./Chat.css";
 
+/* JWT에서 loginId 추출 */
+function getLoginIdFromToken() {
+    const token =
+        localStorage.getItem("accessToken") ||
+        sessionStorage.getItem("accessToken");
+
+    if (!token) return null;
+
+    try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        return payload.sub;
+    } catch (e) {
+        console.error("JWT 파싱 실패", e);
+        return null;
+    }
+}
+
 function Chat() {
-  const navigate = useNavigate();
+    const navigate = useNavigate();
+    const socketRef = useRef(null);
 
-  // 채팅방 임시 데이터 (삭제 예정)
-  const rooms = [
-    {
-      id: 1,
-      type: "구매",
-      nickname: "닉네임A",
-      productStatus: "예약중",
-      productName: "품목 이름 A",
-      productPrice: "8,000원",
-      messages: [
-        { id: 1, sender: "other", text: "안녕하세요 구매 가능할까요?", time: "11:50" },
-        { id: 2, sender: "me", text: "네 가능합니다!", time: "11:52" },
-      ],
-    },
-    {
-      id: 2,
-      type: "판매",
-      nickname: "닉네임B",
-      productStatus: "판매중",
-      productName: "품목 이름 B",
-      productPrice: "12,000원",
-      messages: [
-        { id: 1, sender: "other", text: "아직 판매 중인가요?", time: "12:01" },
-        { id: 2, sender: "me", text: "네 판매 중입니다.", time: "12:03" },
-      ],
-    },
-    {
-      id: 3,
-      type: "구매",
-      nickname: "닉네임C",
-      productStatus: "예약중",
-      productName: "품목 이름 C",
-      productPrice: "5,000원",
-      messages: [
-        { id: 1, sender: "other", text: "거래 가능 시간 언제인가요?", time: "09:15" },
-      ],
-    },
-  ];
+    const CURRENT_USER_ID = getLoginIdFromToken();
 
-  // ===== 상태 =====
-  const [filter, setFilter] = useState("전체");
-  const [selectedRoomId, setSelectedRoomId] = useState(rooms[0].id);
+    const [rooms, setRooms] = useState([]);
+    const [selectedRoomId, setSelectedRoomId] = useState(null);
+    const [roomMessages, setRoomMessages] = useState({});
+    const [input, setInput] = useState("");
 
-  const [roomMessages, setRoomMessages] = useState(() => {
-    const init = {};
-    rooms.forEach((r) => {
-      init[r.id] = r.messages;
-    });
-    return init;
-  });
+    /* 로그인 안 돼 있으면 차단 */
+    useEffect(() => {
+        if (!CURRENT_USER_ID) {
+            alert("로그인이 필요합니다.");
+            navigate("/auth/login");
+        }
+    }, [CURRENT_USER_ID, navigate]);
 
-  const [input, setInput] = useState("");
+    /* 채팅방 목록 */
+    useEffect(() => {
+        if (!CURRENT_USER_ID) return;
 
-  const selectedRoom = useMemo(
-    () => rooms.find((r) => r.id === selectedRoomId),
-    [selectedRoomId]
-  );
+        api.get("/chat/rooms", {
+            params: { loginId: CURRENT_USER_ID },
+        }).then((res) => {
+            setRooms(res.data);
+            if (res.data.length > 0) {
+                setSelectedRoomId(res.data[0].roomId);
+            }
+        });
+    }, [CURRENT_USER_ID]);
 
-  const filteredRooms = useMemo(() => {
-    if (filter === "전체") return rooms;
-    return rooms.filter((r) => r.type === filter);
-  }, [filter, rooms]);
+    const selectedRoom = useMemo(
+        () => rooms.find((r) => r.roomId === selectedRoomId),
+        [rooms, selectedRoomId]
+    );
 
-  // ===== 채팅방 선택 =====
-  const handleSelectRoom = (roomId) => {
-    setSelectedRoomId(roomId);
-    setInput("");
-  };
+    /* 메시지 조회 */
+    useEffect(() => {
+        if (!selectedRoomId) return;
 
-  // ===== 메시지 전송 =====
-  const handleSend = () => {
-    const text = input.trim();
-    if (!text) return;
+        api
+            .get(`/chat/rooms/${selectedRoomId}/messages`)
+            .then((res) => {
+                setRoomMessages((prev) => ({
+                    ...prev,
+                    [selectedRoomId]: res.data,
+                }));
+            });
+    }, [selectedRoomId]);
 
-    const time = new Date().toLocaleTimeString("ko-KR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    /* WebSocket */
+    useEffect(() => {
+        if (!selectedRoomId) return;
 
-    const currentMsgs = roomMessages[selectedRoomId] ?? [];
-    const newMsg = {
-      id: currentMsgs.length + 1,
-      sender: "me",
-      text,
-      time,
+        const socket = new SockJS(`/api/chat?room=${selectedRoomId}`);
+        socketRef.current = socket;
+
+        socket.onmessage = (e) => {
+            const msg = JSON.parse(e.data);
+            setRoomMessages((prev) => ({
+                ...prev,
+                [selectedRoomId]: [
+                    ...(prev[selectedRoomId] || []),
+                    msg,
+                ],
+            }));
+        };
+
+        return () => socket.close();
+    }, [selectedRoomId]);
+
+    const handleSend = () => {
+        if (!input.trim()) return;
+
+        api.post(`/chat/rooms/${selectedRoomId}/messages`, {
+            senderId: CURRENT_USER_ID,
+            content: input,
+        });
+
+        setInput("");
     };
 
-    setRoomMessages((prev) => ({
-      ...prev,
-      [selectedRoomId]: [...prev[selectedRoomId], newMsg],
-    }));
+    const messages = roomMessages[selectedRoomId] || [];
 
-    setInput("");
-  };
+    return (
+        <div className="page">
+            <div className="chat-layout">
+                <aside className="chat-list">
+                    {rooms.map((room) => (
+                        <div
+                            key={room.roomId}
+                            className="chat-room"
+                            onClick={() =>
+                                setSelectedRoomId(room.roomId)
+                            }
+                        >
+                            {room.otherUserName}
+                        </div>
+                    ))}
+                </aside>
 
-  const handleProductAction = (type) => {
-    alert(`${type} 기능은 추후 연결`);
-  };
+                <section className="chat-room-detail">
+                    {selectedRoom ? (
+                        <>
+                            <h3>{selectedRoom.otherUserName}</h3>
 
-  const messages = roomMessages[selectedRoomId] ?? [];
+                            <div className="chat-messages">
+                                {messages.map((msg) => (
+                                    <div
+                                        key={msg.messageId}
+                                        className={
+                                            msg.senderId ===
+                                            CURRENT_USER_ID
+                                                ? "me"
+                                                : "other"
+                                        }
+                                    >
+                                        {msg.content}
+                                    </div>
+                                ))}
+                            </div>
 
-  return (
-    <div className="page">
-      <div className="container">
-        <div className="chat-layout">
-          {/* ===== 왼쪽: 대화방 목록 ===== */}
-          <aside className="chat-list">
-            <div className="chat-list-header">
-              {/*  뒤로가기 버튼 */}
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <button
-                  className="back-btn"
-                  onClick={() => navigate(-1)}
-                >
-                〈
-                </button>
-                <h2>대화방</h2>
-              </div>
-
-              <div className="chat-filters">
-                <button
-                  className={`filter-btn ${filter === "전체" ? "active" : ""}`}
-                  onClick={() => setFilter("전체")}
-                >
-                  전체
-                </button>
-                <button
-                  className={`filter-btn ${filter === "판매" ? "active" : ""}`}
-                  onClick={() => setFilter("판매")}
-                >
-                  판매
-                </button>
-                <button
-                  className={`filter-btn ${filter === "구매" ? "active" : ""}`}
-                  onClick={() => setFilter("구매")}
-                >
-                  구매
-                </button>
-              </div>
+                            <div className="chat-input">
+                                <input
+                                    value={input}
+                                    onChange={(e) =>
+                                        setInput(e.target.value)
+                                    }
+                                    onKeyDown={(e) =>
+                                        e.key === "Enter" && handleSend()
+                                    }
+                                />
+                                <button onClick={handleSend}>전송</button>
+                            </div>
+                        </>
+                    ) : (
+                        <p>채팅방을 선택하세요</p>
+                    )}
+                </section>
             </div>
-
-            <div className="chat-room-list">
-              {filteredRooms.map((room) => {
-                const last =
-                  (roomMessages[room.id] ?? room.messages).slice(-1)[0];
-                return (
-                  <div
-                    key={room.id}
-                    className={`chat-room ${
-                      selectedRoomId === room.id ? "active" : ""
-                    }`}
-                    onClick={() => handleSelectRoom(room.id)}
-                  >
-                    <div className="profile-circle" />
-                    <div className="chat-room-info">
-                      <p className="nickname">{room.nickname}</p>
-                      <p className="last-message">
-                        {last ? last.text : "대화가 없습니다."}
-                      </p>
-                    </div>
-                    <div className="chat-room-meta">
-                      <span className="time">{last?.time}</span>
-                      <div className="product-thumb">상품<br />사진</div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </aside>
-
-          {/* ===== 오른쪽: 채팅 영역 ===== */}
-          <section className="chat-room-detail">
-            <header className="chat-header">
-              <span className="chat-title">{selectedRoom?.nickname}</span>
-            </header>
-
-            <div className="chat-product">
-              <div className="product-image">상품<br />사진</div>
-              <div className="product-info">
-                <div className="product-top">
-                  <span className="product-status">
-                    {selectedRoom?.productStatus}
-                  </span>
-                  <span className="product-name">
-                    {selectedRoom?.productName}
-                  </span>
-                </div>
-                <p className="product-price">
-                  {selectedRoom?.productPrice}
-                </p>
-                <div className="product-actions">
-                  <button onClick={() => handleProductAction("송금 요청")}>
-                    송금 요청
-                  </button>
-                  <button onClick={() => handleProductAction("후기 작성")}>
-                    후기 작성
-                  </button>
-                  <button onClick={() => handleProductAction("장소 공유")}>
-                    장소 공유
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="chat-messages">
-              {messages.map((msg) => (
-                <div key={msg.id} className={`message ${msg.sender}`}>
-                  <p>{msg.text}</p>
-                  <span className="msg-time">{msg.time}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="chat-input">
-              <button className="plus-btn">＋</button>
-              <input
-                type="text"
-                placeholder="메시지를 입력하세요"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              />
-              <button className="send-btn" onClick={handleSend}>
-                ➤
-              </button>
-            </div>
-          </section>
         </div>
-      </div>
-    </div>
-  );
+    );
 }
 
 export default Chat;

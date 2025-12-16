@@ -1,10 +1,42 @@
 import "./Main.css";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import api from "../api/api"
+
+function getLoginIdFromToken() {
+    const token =
+        localStorage.getItem("accessToken") ||
+        sessionStorage.getItem("accessToken");
+
+    if (!token) return null;
+
+    try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        return payload.sub;
+    } catch (e) {
+        console.error("JWT 파싱 실패", e);
+        return null;
+    }
+}
 
 function Main() {
     const navigate = useNavigate();
+
+    const loginId = getLoginIdFromToken();
+
+    const isLoggedIn = () => {
+        return (
+            localStorage.getItem("accessToken") ||
+            sessionStorage.getItem("accessToken")
+        );
+    };
+
+    const handleChatClick = () => {
+        if (!isLoggedIn()) {
+            alert("로그인이 필요합니다.");
+            navigate("/auth/login");
+            return;
+        }
+        navigate("/chat");
+    };
 
     // 임시 데이터 (삭제 예정)
     const books = [
@@ -22,72 +54,56 @@ function Main() {
         (a, b) => new Date(b.date) - new Date(a.date)
     );
 
-  return (
-    <div className="page main-page">
-      <div className="container">
     return (
-        <div className="page">
+        <div className="page main-page">
             <div className="container">
 
-        <header className="header">
-          <div className="header-inner">
-          <div className="logo" style={{ color: "#00FF00" }}>책의 온도</div>
-            <div className="header-right">
-              <button className="header-btn" onClick={() => navigate("/chat")}>채팅방</button>
-              <span className="login-id">{loginId}님</span>
-              <button className="header-btn" onClick={handleLogout}>로그아웃</button>
-            </div>
-          {/*<div className="header-buttons">*/}
-          {/*  <button className="header-btn" onClick={() => navigate("/chat")}>*/}
-          {/*    채팅방*/}
-          {/*  </button>*/}
-          {/*  {loginId ? (*/}
-          {/*      <>*/}
-          {/*          <div style={{marginTop: 4, color: "#00FF00" }}>{loginId}님</div>*/}
-          {/*      <button className="header-btn" onClick={handleLogout}>로그아웃</button>*/}
-          {/*      </>*/}
-          {/*  ) : (*/}
-          {/*      <>*/}
-          {/*        <button className="header-btn" onClick={() => navigate("/auth/login")}>로그인</button>*/}
-          {/*        <button className="header-btn signup" onClick={() => navigate("/auth/register")}>회원가입</button>*/}
-          {/*      </>*/}
-          {/*  )}*/}
+                {/* header */}
+                <header className="header">
+                    <div className="header-inner">
+                        <div className="logo" style={{ color: "#00FF00" }}>
+                            책의 온도
+                        </div>
 
-          {/*</div>*/}
-          </div>
-        </header>
+                        <div className="header-right">
+                            <button
+                                className="header-btn"
+                                onClick={handleChatClick}
+                            >
+                                채팅방
+                            </button>
+
+                            {isLoggedIn() && loginId ? (
+                                <span className="welcome-text">
+                                    {loginId}님 환영합니다
+                                </span>
+                            ) : (
+                                <>
+                                    <button
+                                        className="header-btn"
+                                        onClick={() => navigate("/auth/login")}
+                                    >
+                                        로그인
+                                    </button>
+                                    <button
+                                        className="header-btn signup"
+                                        onClick={() =>
+                                            navigate("/auth/register")
+                                        }
+                                    >
+                                        회원가입
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </header>
+
                 {/* hero */}
                 <section className="hero">
                     <div className="hero-overlay">
-
-                        {/* header (hero-overlay 안으로 이동) */}
-                        <div className="header">
-                            <div className="logo">책의 온도</div>
-                            <div className="header-buttons">
-                                <button
-                                    className="header-btn"
-                                    onClick={() => navigate("/chat")}
-                                >
-                                    채팅방
-                                </button>
-                                <button
-                                    className="header-btn"
-                                    onClick={() => navigate("/auth/login")}
-                                >
-                                    로그인
-                                </button>
-                                <button
-                                    className="header-btn signup"
-                                    onClick={() => navigate("/auth/register")}
-                                >
-                                    회원가입
-                                </button>
-                            </div>
-                        </div>
-
                         <h1>함께 읽고 나누는 독서 활동</h1>
                         <p>책과 사람을 연결합니다</p>
-
                     </div>
                 </section>
 
@@ -96,7 +112,10 @@ function Main() {
                     <div className="content-header">
                         <h2>중고 도서 목록</h2>
                         <div className="search-box">
-                            <input className="search-input" placeholder="검색" />
+                            <input
+                                className="search-input"
+                                placeholder="검색"
+                            />
                             <button className="search-btn">검색</button>
                         </div>
                     </div>
@@ -104,12 +123,21 @@ function Main() {
                     <div className="book-list">
                         {bookList.map((book) => (
                             <div className="book-card" key={book.id}>
-                                <img className="book-image" alt="책 이미지" />
+                                <img
+                                    className="book-image"
+                                    alt="책 이미지"
+                                />
                                 <div className="book-info">
-                                    <p className="book-title">{book.title}</p>
+                                    <p className="book-title">
+                                        {book.title}
+                                    </p>
                                     <div className="book-meta">
-                                        <span className="book-price">{book.price}</span>
-                                        <span className="book-date">{book.date}</span>
+                                        <span className="book-price">
+                                            {book.price}
+                                        </span>
+                                        <span className="book-date">
+                                            {book.date}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -128,7 +156,6 @@ function Main() {
                         <button className="page-btn">{`>>`}</button>
                     </div>
                 </section>
-
             </div>
         </div>
     );
