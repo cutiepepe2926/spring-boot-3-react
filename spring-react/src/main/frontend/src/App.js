@@ -14,7 +14,8 @@ function App() {
             <Routes>
                 {/* 기존 */}
                 <Route path="/" element={<Main />} />
-                <Route path="/chat" element={<ProtectedRoute> <Chat /> </ProtectedRoute>} />
+                {/*<Route path="/chat" element={<ProtectedRoute> <Chat /> </ProtectedRoute>} />*/}
+                <Route path="/chat" element={ <Chat />} />
                 <Route path="/detail/:id" element={<BookDetail />} />
                 {/*<Route path="/detail/:id" element={<ProtectedRoute> <BookDetail /> </ProtectedRoute>} />*/}
                 <Route path="/register" element={<BookRegister />} />

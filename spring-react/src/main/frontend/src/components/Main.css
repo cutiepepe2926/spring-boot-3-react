@@ -166,6 +166,10 @@
   outline: none;
 }
 
+.search-box {
+    margin-top: 10px;
+}
+
 /* button */
 .page .search-btn{
   padding: 0 14px;        /* ✅ 세로 padding 제거 */
@@ -314,4 +318,11 @@
   .hero-overlay h1 {
     font-size: 24px;
   }
+}
+
+.welcome-text {
+    margin-left: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6af16a;
 }
