@@ -1,8 +1,33 @@
 import "./Main.css";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import api from "../api/api"
 
 function Main() {
   const navigate = useNavigate();
+
+  const [loginId, setLoginId] = useState(null); // null = 비로그인
+
+  useEffect(() => {
+    api.get("/me")
+        .then(res => setLoginId(res.data.loginId))
+        .catch(() => {
+          // 토큰이 없거나/무효면 비로그인 처리
+          localStorage.removeItem("accessToken");
+          sessionStorage.removeItem("accessToken");
+          setLoginId(null);
+        });
+  }, []);
+
+
+
+  // 로그아웃 기능
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    sessionStorage.removeItem("accessToken");
+    setLoginId(null);
+    navigate("/auth/login"); // 원하면 "/"로 바꿔도 됨
+  };
 
   //임시 데이터 (삭제 예정)
   const books = [
@@ -25,13 +50,23 @@ function Main() {
       <div className="container">
 
         <header className="header">
-          <div className="logo">책의 온도</div>
+          <div className="logo" style={{ color: "#00FF00" }}>책의 온도</div>
           <div className="header-buttons">
             <button className="header-btn" onClick={() => navigate("/chat")}>
               채팅방
             </button>
-            <button className="header-btn" onClick={() => navigate("/auth/login")}>로그인</button>
-            <button className="header-btn signup" onClick={() => navigate("/auth/register")}>회원가입</button>
+            {loginId ? (
+                <>
+                    <div style={{marginTop: 4, color: "#00FF00" }}>{loginId}님</div>
+                <button className="header-btn" onClick={handleLogout}>로그아웃</button>
+                </>
+            ) : (
+                <>
+                  <button className="header-btn" onClick={() => navigate("/auth/login")}>로그인</button>
+                  <button className="header-btn signup" onClick={() => navigate("/auth/register")}>회원가입</button>
+                </>
+            )}
+
           </div>
         </header>
 

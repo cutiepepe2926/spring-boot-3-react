@@ -1,6 +1,6 @@
 // src/pages/SignupPage.js
 import React, { useState } from "react";
-import axios from "axios";
+import api from "../api/api";
 
 function SignupPage() {
     const [form, setForm] = useState({
@@ -70,7 +70,7 @@ function SignupPage() {
         };
 
         try {
-            await axios.post("/api/auth/v1/idCheck", payload);
+            await api.post("/auth/v1/idCheck", payload);
             // 서버가 200이면 사용 가능
             alert("아이디 사용 가능!");
 
@@ -137,7 +137,7 @@ function SignupPage() {
         };
 
         try {
-            await axios.post("/api/auth/v1/register", payload);
+            await api.post("/auth/v1/register", payload);
             alert("회원가입 성공!");
             window.location.href = "/auth/login";
         } catch (e) {

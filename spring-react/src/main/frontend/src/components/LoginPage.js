@@ -1,6 +1,6 @@
 // src/pages/LoginPage.js
 import React, { useState } from "react";
-import axios from "axios";
+import api from "../api/api";
 
 function LoginPage() {
     const [form, setForm] = useState({
@@ -27,7 +27,7 @@ function LoginPage() {
         }
 
         try {
-            const res = await axios.post("/api/auth/v1/login", payload);
+            const res = await api.post("/auth/v1/login", payload);
 
             const accessToken = res.data?.accessToken;
             if (!accessToken) throw new Error("토큰이 응답에 없습니다.");

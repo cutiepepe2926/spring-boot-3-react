@@ -4,7 +4,7 @@ import "./App.css";
 
 import Main from "./components/Main";
 import Chat from "./components/Chat";
-
+import ProtectedRoute from "./routes/ProtectedRoute";
 import AuthLayout from "./components/AuthLayout"; // 새로 만들 파일
 
 function App() {
@@ -12,7 +12,7 @@ function App() {
             <Routes>
                 {/* 기존 */}
                 <Route path="/" element={<Main />} />
-                <Route path="/chat" element={<Chat />} />
+                <Route path="/chat" element={<ProtectedRoute> <Chat /> </ProtectedRoute>} />
 
                 {/* Auth 영역: /auth/* 아래로 묶음 */}
                 <Route path="/auth/*" element={<AuthLayout />} />
