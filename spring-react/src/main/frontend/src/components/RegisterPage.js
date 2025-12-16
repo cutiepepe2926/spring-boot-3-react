@@ -1,6 +1,7 @@
 // src/pages/SignupPage.js
 import React, { useState } from "react";
 import api from "../api/api";
+import "../style/auth.css";
 
 function SignupPage() {
     const [form, setForm] = useState({

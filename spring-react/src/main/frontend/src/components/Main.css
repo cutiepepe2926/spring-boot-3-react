@@ -4,68 +4,94 @@
   background-color: #ffffff;
 }
 
-.container {
+.page .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
 }
 
-/* ===== 헤더 ===== */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 60px;
-
+/* ✅ 메인 헤더: 투명 + 선 제거 + 오버레이보다 위 */
+.page .header {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
 
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
+  height: 60px;
+  background: transparent;
+  border: none;      /* ✅ border 제거 */
+  z-index: 50;
 
-  z-index: 10;
+  /* ✅ 헤더 자체는 전체폭이지만 내부는 컨테이너 폭으로 맞출 거라 padding만 최소 */
+  padding: 0 20px;
+  width: 100%;
 }
 
-.logo {
+/* ✅ 로고/버튼을 hero-overlay(=컨테이너 폭) 안으로 */
+.page .header {
+  max-width: 1200px;  /* ✅ .container / hero-overlay와 동일 값으로 */
+  margin: 0 auto;     /* ✅ 가운데 정렬 */
+}
+
+.page .header .logo {
   margin-left: 20px;
   font-size: 20px;
   font-weight: bold;
   color: #ffffff;
 }
 
-.header-buttons {
+.page .header .header-buttons {
   display: flex;
   gap: 10px;
 }
 
-.header-btn {
+.page .header .header-btn {
   padding: 6px 12px;
-  border: 1px solid #ccc;
   background-color: #ffffff;
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
 }
 
-.header-btn:hover {
+.page .header .header-btn:hover {
   background-color: #f5f5f5;
 }
 
-.header-btn.signup {
+.page .header .header-btn.signup {
   background-color: #333;
   color: #ffffff;
   border-color: #333;
 }
 
-.header-btn.signup:hover {
+.page .header .header-btn.signup:hover {
   background-color: #555;
 }
 
+/* ✅ 헤더 내부 컨텐츠 폭을 content-header(=container) 기준으로 맞춤 */
+.page .header-inner {
+  max-width: 1200px;     /* .container와 동일 */
+  margin: 0 auto;
+  padding: 0 20px;       /* .container와 동일 */
+  height: 60px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.page .header-right{
+  display:flex;
+  align-items:center;
+  gap: 12px; /* ✅ 버튼들 사이 공백 */
+}
+
+.page .login-id{
+  color:#00FF00;      /* 원하면 */
+  font-weight:600;
+  margin: 0 4px;
+}
+
 /* ===== hero ===== */
-.hero {
+.page .hero {
   width: 100%;
   height: 360px;
   background-image: url("https://images.unsplash.com/photo-1524995997946-a1c2e315a42f");
@@ -74,7 +100,11 @@
   position: relative;
 }
 
-.hero-overlay {
+.page .hero {
+  padding-top: 60px;  /* ✅ 헤더 높이만큼 */
+}
+
+.page .hero-overlay {
   position: absolute;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.45);
@@ -86,55 +116,79 @@
   text-align: center;
 }
 
-.hero-overlay h1 {
+/* ✅ 오버레이는 헤더보다 아래 레이어 */
+.page .hero-overlay {
+  z-index: 10;
+}
+
+.page .hero-overlay h1 {
   font-size: 32px;
   margin-bottom: 10px;
 }
 
-.hero-overlay p {
+.page .hero-overlay p {
   font-size: 15px;
 }
 
 /* ===== content ===== */
-.content-header {
+.page .content-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
 
-.content-header h2 {
+.page .content-header h2 {
   font-size: 20px;
 }
 
-.search-box {
+.page .search-box{
   display: flex;
-  align-items: center;
+  align-items: stretch;   /* ✅ 같은 높이로 쭉 늘림 */
   gap: 8px;
 }
 
-.search-input {
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.search-btn {
-  padding: 8px 14px;
-  background-color: #333;
-  color: #ffffff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+/* ✅ input과 button을 완전히 동일한 박스 규격으로 */
+.page .search-input,
+.page .search-btn{
+  box-sizing: border-box;
+  height: 36px;           /* 원하는 높이 */
+  line-height: 36px;      /* ✅ 텍스트 수직 정렬까지 강제 */
   font-size: 14px;
 }
 
-.search-btn:hover {
+/* input */
+.page .search-input{
+  padding: 0 14px;        /* ✅ height 고정이니 세로 padding 제거 */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin: 0;              /* 혹시 남아있을 수 있는 margin 제거 */
+  outline: none;
+}
+
+/* button */
+.page .search-btn{
+  padding: 0 14px;        /* ✅ 세로 padding 제거 */
+  border: 0;
+  border-radius: 4px;
+  background-color: #333;
+  color: #fff;
+  cursor: pointer;
+
+  white-space: nowrap;
+  min-width: 56px;
+  display: inline-flex;   /* 텍스트 가운데 */
+  align-items: center;
+  justify-content: center;
+  line-height: normal;    /* ✅ inline-flex 사용 시 line-height는 normal이 더 안정적 */
+}
+
+.page .search-btn:hover {
   background-color: #555;
 }
 
 /* ===== book list ===== */
-.book-list {
+.page .book-list {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(2, auto);
@@ -143,7 +197,7 @@
   overflow: hidden;
 }
 
-.book-card {
+.page .book-card {
   background-color: #ffffff;
   border: 1px solid #e0e0e0;
   border-radius: 6px;
@@ -151,41 +205,41 @@
   cursor: pointer;
 }
 
-.book-image {
+.page .book-image {
   width: 100%;
   height: 220px;
   background-color: #eeeeee;
   display: block;
 }
 
-.book-info {
+.page .book-info {
   padding: 10px;
 }
 
-.book-title {
+.page .book-title {
   font-size: 14px;
   line-height: 1.4;
   margin-bottom: 8px;
 }
 
-.book-meta {
+.page .book-meta {
   display: flex;
   justify-content: space-between;
   font-size: 13px;
   color: #666;
 }
 
-.book-price {
+.page .book-price {
   font-weight: bold;
   color: #333;
 }
 
-.book-date {
+.page .book-date {
   color: #999;
 }
 
 /* ===== pagination ===== */
-.pagination {
+.page .pagination {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -193,8 +247,8 @@
   margin: 40px 0;
 }
 
-.page-btn,
-.page-number {
+.page .page-btn,
+.page .page-number {
   padding: 6px 10px;
   border: 1px solid #ccc;
   background-color: #ffffff;
@@ -203,29 +257,61 @@
   font-size: 14px;
 }
 
-.page-number.active {
+.page .page-number.active {
   background-color: #333;
   color: #ffffff;
   border-color: #333;
 }
 
-.page-btn:hover,
-.page-number:hover {
+.page .page-btn:hover,
+.page .page-number:hover {
   background-color: #f0f0f0;
 }
 
+/* ✅ 메인 헤더는 화면 전체폭 + 투명 + 위로 */
+.page .header{
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 60px;
+  background: transparent;
+  border: none;
+  z-index: 50;
+  width: 100%;
+}
+
+/* ✅ 핵심: header-inner를 전체폭으로(=auth.css 느낌) */
+.page .header-inner{
+  display: flex;
+  width: 960px;              /* ✅ 줄 전체 폭 확보 */
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 24px;          /* ✅ 좌우 여백만 주기(원하면 40px로 더 키워도 됨) */
+  height: 60px;
+
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ✅ 오른쪽 3개 간격 */
+.page .header-right{
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+
 @media (max-width: 1024px) {
-  .book-list {
+  .page .book-list {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 600px) {
-  .book-list {
+  .page .book-list {
     grid-template-columns: 1fr;
   }
 
-  .hero-overlay h1 {
+  .page .hero-overlay h1 {
     font-size: 24px;
   }
 }
