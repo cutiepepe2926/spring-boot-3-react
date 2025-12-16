@@ -1,6 +1,7 @@
 // src/pages/LoginPage.js
 import React, { useState } from "react";
 import api from "../api/api";
+import "../style/auth.css";
 
 function LoginPage() {
     const [form, setForm] = useState({

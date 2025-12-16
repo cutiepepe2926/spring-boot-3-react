@@ -22,10 +22,40 @@ function Main() {
         (a, b) => new Date(b.date) - new Date(a.date)
     );
 
+  return (
+    <div className="page main-page">
+      <div className="container">
     return (
         <div className="page">
             <div className="container">
 
+        <header className="header">
+          <div className="header-inner">
+          <div className="logo" style={{ color: "#00FF00" }}>책의 온도</div>
+            <div className="header-right">
+              <button className="header-btn" onClick={() => navigate("/chat")}>채팅방</button>
+              <span className="login-id">{loginId}님</span>
+              <button className="header-btn" onClick={handleLogout}>로그아웃</button>
+            </div>
+          {/*<div className="header-buttons">*/}
+          {/*  <button className="header-btn" onClick={() => navigate("/chat")}>*/}
+          {/*    채팅방*/}
+          {/*  </button>*/}
+          {/*  {loginId ? (*/}
+          {/*      <>*/}
+          {/*          <div style={{marginTop: 4, color: "#00FF00" }}>{loginId}님</div>*/}
+          {/*      <button className="header-btn" onClick={handleLogout}>로그아웃</button>*/}
+          {/*      </>*/}
+          {/*  ) : (*/}
+          {/*      <>*/}
+          {/*        <button className="header-btn" onClick={() => navigate("/auth/login")}>로그인</button>*/}
+          {/*        <button className="header-btn signup" onClick={() => navigate("/auth/register")}>회원가입</button>*/}
+          {/*      </>*/}
+          {/*  )}*/}
+
+          {/*</div>*/}
+          </div>
+        </header>
                 {/* hero */}
                 <section className="hero">
                     <div className="hero-overlay">

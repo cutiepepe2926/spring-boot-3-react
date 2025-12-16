@@ -42,6 +42,12 @@ public class SecurityConfig {
                         .requestMatchers( "/api/auth/v1/**").permitAll()
                         // 개발 초반엔 디버깅용 전부 허용 (JWT 붙이기 전까지만)
                         //.anyRequest().permitAll()
+                        .requestMatchers(
+                                "/", "/index.html",
+                                "/static/**",
+                                "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.jpeg", "/*.svg", "/*.ico",
+                                "/assets/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthFilter(jwtSecret, jwtIssuer), UsernamePasswordAuthenticationFilter.class);
