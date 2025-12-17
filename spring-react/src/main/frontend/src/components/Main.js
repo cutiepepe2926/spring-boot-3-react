@@ -32,6 +32,12 @@ function Main() {
         );
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem("accessToken");
+        sessionStorage.removeItem("accessToken");
+        navigate("/");
+    };
+
     const handleChatClick = () => {
         navigate("/chat");
     };
@@ -67,14 +73,24 @@ function Main() {
                             </button>
 
                             {isLoggedIn() && loginId ? (
-                                <span className="welcome-text">
-                                    {loginId}님 환영합니다
-                                </span>
+                                <div className="login-info">
+                                    <span className="welcome-text">
+                                        {loginId}님 환영합니다
+                                    </span>
+                                    <button
+                                        className="header-btn logout"
+                                        onClick={handleLogout}
+                                    >
+                                        로그아웃
+                                    </button>
+                                </div>
                             ) : (
                                 <>
                                     <button
                                         className="header-btn"
-                                        onClick={() => navigate("/auth/login")}
+                                        onClick={() =>
+                                            navigate("/auth/login")
+                                        }
                                     >
                                         로그인
                                     </button>
@@ -102,6 +118,10 @@ function Main() {
                 <section className="content">
                     <div className="content-header">
                         <h2>중고 도서 목록</h2>
+                        <div className="search-box">
+                            <input className="search-input" placeholder="검색" />
+                            <button className="search-btn">검색</button>
+                        </div>
                     </div>
 
                     <div className="book-list">
