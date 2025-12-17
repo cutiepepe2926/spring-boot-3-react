@@ -1,51 +1,34 @@
+// BookDetail.jsx
 import "./BookDetail.css";
-import { useParams } from "react-router-dom";
 
-function BookDetail() {
-  const { id } = useParams(); // URL에서 id 가져오기
-  
+function BookDetail({ book, onClose }) {
   return (
-    <div className="page-wrap">
-      <div className="container">
-        <h3 style={{ fontSize: "20px", marginBottom: "25px" }}>
-          도서 상세 정보 - ID: {id}
-        </h3>
-
-        <div className="detail-box">
-          <div className="book-img">
-            <img src="/book.webp" alt="book" />
-          </div>
-
-          <div className="book-info">
-            <h2>건축너머 비평너머</h2>
-
-            <div className="meta">
-              저자 : 박영민<br />
-              출판사 : 안그라픽스<br />
-              출간일 : 2024년 01월 31일
+      <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-content" onClick={e => e.stopPropagation()}>
+          <div className="detail-box">
+            <div className="book-img">
+              <img src="/book.webp" alt={book.title} />
             </div>
-
-            <div className="price">8,000원</div>
-
-            <div className="divider"></div>
-
-            <h4>도서 정보</h4>
-            <p>
-              건축너머 비평너머 책입니다.
-              <br />
-              개인 의견이 포함돼 있을 수 있습니다.
-              <br />
-              하단 안내가 읽기 좋았습니다.
-            </p>
-
-            <div className="btn-box">
-              <button className="btn btn-save">찜하기</button>
-              <button className="btn btn-talk">구매하기</button>
+            <div className="book-info">
+              <h2>{book.title}</h2>
+              <div className="meta">
+                저자 : {book.author || "미상"}<br />
+                출판사 : {book.publisher || "미상"}<br />
+                출간일 : {book.date}
+              </div>
+              <div className="price">{book.price}</div>
+              <div className="divider"></div>
+              <h4>도서 정보</h4>
+              <p>{book.description || "상세 정보 없음"}</p>
+              <div className="btn-box">
+                <button className="btn btn-save">찜하기</button>
+                <button className="btn btn-talk">구매하기</button>
+              </div>
+              <button className="modal-close" onClick={onClose}>닫기</button>
             </div>
           </div>
         </div>
       </div>
-    </div>
   );
 }
 

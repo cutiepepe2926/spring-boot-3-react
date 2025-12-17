@@ -2,11 +2,13 @@ import "./Main.css";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../api/api"
+import BookDetail from "./BookDetail";
 
 function Main() {
   const navigate = useNavigate();
 
   const [loginId, setLoginId] = useState(null); // null = 비로그인
+  const [selectedBook, setSelectedBook] = useState(null);
 
   useEffect(() => {
     api.get("/me")
@@ -27,6 +29,16 @@ function Main() {
     sessionStorage.removeItem("accessToken");
     setLoginId(null);
     navigate("/auth/login"); // 원하면 "/"로 바꿔도 됨
+  };
+
+  // 책 클릭 시 모달 열기
+  const openModal = (book) => {
+    setSelectedBook(book);
+  };
+
+  // 모달 닫기
+  const closeModal = () => {
+    setSelectedBook(null);
   };
 
   //임시 데이터 (삭제 예정)
@@ -88,12 +100,12 @@ function Main() {
 
         <div className="book-list">
           {bookList.map((book) => (
-            <div
-              className="book-card"
-              key={book.id}
-              onClick={() => navigate(`/detail/${book.id}`)}
-              style={{ cursor: "pointer" }} // 클릭 가능 표시
-            >
+              <div
+                  className="book-card"
+                  key={book.id}
+                  onClick={() => openModal(book)} // 클릭 시 모달 열기
+                  style={{ cursor: "pointer" }}
+              >
               <img className="book-image" alt="책 이미지" />
               <div className="book-info">
                 <p className="book-title">{book.title}</p>
@@ -105,6 +117,9 @@ function Main() {
             </div>
           ))}
         </div>
+
+          {/* 모달 렌더링 */}
+          {selectedBook && <BookDetail book={selectedBook} onClose={closeModal} />}
 
 
           <div className="pagination">
@@ -118,6 +133,7 @@ function Main() {
             <button className="page-btn">{`>`}</button>
             <button className="page-btn">{`>>`}</button>
           </div>
+
         </section>
 
       </div>
