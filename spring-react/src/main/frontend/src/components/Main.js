@@ -1,40 +1,31 @@
-import "./Main.css";
 import { useNavigate } from "react-router-dom";
-
-function getLoginIdFromToken() {
-    const token =
-        localStorage.getItem("accessToken") ||
-        sessionStorage.getItem("accessToken");
-
-    if (!token) return null;
-
-    try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        return payload.sub;
-    } catch (e) {
-        console.error("JWT 파싱 실패", e);
-        return null;
-    }
-}
+import { useEffect, useState } from "react";
+import api from "../api/api"
+import "./Main.css";
 
 function Main() {
+
     const navigate = useNavigate();
 
-    const loginId = getLoginIdFromToken();
+    const [loginId, setLoginId] = useState(null); // null = 비로그인
 
-    const isLoggedIn = () => {
-        return (
-            localStorage.getItem("accessToken") ||
-            sessionStorage.getItem("accessToken")
-        );
-    };
+    useEffect(() => {
+        api.get("/me")
+            .then(res => setLoginId(res.data.loginId))
+            .catch(() => {
+                // 토큰이 없거나/무효면 비로그인 처리
+                localStorage.removeItem("accessToken");
+                sessionStorage.removeItem("accessToken");
+                setLoginId(null);
+            });
+    }, []);
 
     const handleChatClick = () => {
-        if (!isLoggedIn()) {
-            alert("로그인이 필요합니다.");
-            navigate("/auth/login");
-            return;
-        }
+        // if (!isLoggedIn()) {
+        //     alert("로그인이 필요합니다.");
+        //     navigate("/auth/login");
+        //     return;
+        // }
         navigate("/chat");
     };
 
@@ -73,7 +64,7 @@ function Main() {
                                 채팅방
                             </button>
 
-                            {isLoggedIn() && loginId ? (
+                            { loginId ? (
                                 <span className="welcome-text">
                                     {loginId}님 환영합니다
                                 </span>
