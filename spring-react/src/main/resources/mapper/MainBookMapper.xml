@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.spring_react.spring_react.book.BookMapper">
+
+    <!-- 중고도서 목록 -->
+    <select id="getMainBookList"
+            resultType="com.spring_react.spring_react.command.MainBookVO">
+
+        SELECT
+            b.book_id    AS bookId,
+            b.title      AS title,
+            b.price      AS price,
+            b.create_at  AS createAt,
+            bi.image_url AS imageUrl
+        FROM book b
+                 LEFT JOIN book_image bi
+                           ON b.book_id = bi.book_id
+                               AND bi.is_thumbnail = 1
+        WHERE b.status = '판매중'
+        ORDER BY b.create_at DESC
+
+    </select>
+
+</mapper>

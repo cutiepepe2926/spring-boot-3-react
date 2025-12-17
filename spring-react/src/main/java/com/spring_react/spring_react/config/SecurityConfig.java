@@ -40,6 +40,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 일단 로그인/회원가입은 열어두기 (경로는 API 엔드포인트가 추가될 경우 추가하기)
                         .requestMatchers( "/api/auth/v1/**").permitAll()
+                        .requestMatchers("/api/books/main").permitAll()
                         // 개발 초반엔 디버깅용 전부 허용 (JWT 붙이기 전까지만)
                         //.anyRequest().permitAll()
                         .requestMatchers(

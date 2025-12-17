@@ -3,6 +3,7 @@ package com.spring_react.spring_react.chat;
 import com.spring_react.spring_react.command.ChatRoomVO;
 import com.spring_react.spring_react.command.ChatVO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -10,9 +11,16 @@ import java.util.List;
 public interface ChatMapper {
 
     // 채팅방 생성
-    int insertChatRoom(Long bookId, Long sellerId, Long buyerId);
+    int insertChatRoom(
+            @Param("bookId") Long bookId,
+            @Param("sellerId") Long sellerId,
+            @Param("buyerId") Long buyerId
+    );
 
-    // 채팅방 목록 (내 채팅 리스트)
+    // 생성된 채팅방 조회
+    ChatRoomVO getChatRoomById(Long roomId);
+
+    // 채팅방 목록
     List<ChatRoomVO> getChatRoomList(Long userId);
 
     // 채팅 메시지 목록

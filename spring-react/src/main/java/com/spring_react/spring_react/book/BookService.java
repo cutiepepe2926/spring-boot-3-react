@@ -1,16 +1,11 @@
 package com.spring_react.spring_react.book;
 
-import com.spring_react.spring_react.command.BookVO;
+import com.spring_react.spring_react.command.MainBookVO;
 
 import java.util.List;
 
 public interface BookService {
 
-    List<BookVO> getBookList();
+    List<MainBookVO> getMainBookList();
 
-    BookVO getBook(String id);
-
-    void registerBook(BookVO bookVO);
-
-    void removeBook(String id);
 }

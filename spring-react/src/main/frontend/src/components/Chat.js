@@ -30,15 +30,14 @@ function Chat() {
     const loginId = getLoginIdFromToken();
     const token = getToken();
 
-    console.log("Chat Render - Token:", token ? "Exists" : "Null");
-    console.log("Chat Render - LoginId:", loginId);
-
     useEffect(() => {
-        // 기존: if (!token) { navigate("/auth/login"); }
-        // 수정: 토큰이 없거나, 토큰은 있지만 유효하지 않아 loginId를 얻지 못한 경우
+
         if (!token || !loginId) {
-            navigate("/auth/login");
+            alert("로그인 후 이용 가능합니다.");
+            navigate("/auth/login", { replace: true });
+            return;
         }
+
     }, [token, loginId, navigate]);
 
     const [rooms, setRooms] = useState([]);
@@ -49,25 +48,7 @@ function Chat() {
 
     /* 채팅방 목록 */
     useEffect(() => {
-        if (!loginId) return;
 
-        api
-            .get("/chat/rooms", {
-                params: { userId: loginId },
-            })
-            .then((res) => {
-                setRooms(res.data);
-                if (res.data.length > 0) {
-                    setSelectedRoomId(res.data[0].roomId);
-                }
-            })
-            .catch((err) => {
-                console.log(
-                    "chat rooms error",
-                    err.response?.status,
-                    err.response?.data
-                );
-            });
     }, [loginId]);
 
     const selectedRoom = useMemo(() => {
@@ -81,73 +62,12 @@ function Chat() {
 
     /* 메시지 조회 */
     useEffect(() => {
-        if (!selectedRoomId) return;
 
-        api
-            .get(`/chat/rooms/${selectedRoomId}/messages`)
-            .then((res) => {
-                setRoomMessages((prev) => ({
-                    ...prev,
-                    [selectedRoomId]: res.data,
-                }));
-            })
-            .catch((err) => {
-                console.log(
-                    "messages error",
-                    err.response?.status,
-                    err.response?.data
-                );
-            });
     }, [selectedRoomId]);
-
-    /* WebSocket 연결 */
-    useEffect(() => {
-        if (!selectedRoomId) return;
-
-        const socket = new SockJS(
-            `/api/chat?room=${selectedRoomId}&token=${token}`
-        );
-        socketRef.current = socket;
-
-        socket.onmessage = (e) => {
-            const payload = JSON.parse(e.data);
-            setRoomMessages((prev) => {
-                const prevMsgs = prev[selectedRoomId] ?? [];
-                return {
-                    ...prev,
-                    [selectedRoomId]: [...prevMsgs, payload],
-                };
-            });
-        };
-
-        socket.onerror = (e) => {
-            console.log("socket error", e);
-        };
-
-        return () => {
-            socket.close();
-            socketRef.current = null;
-        };
-    }, [selectedRoomId, token]);
 
     /* 메시지 전송 */
     const handleSend = () => {
-        const text = input.trim();
-        if (!text || !selectedRoomId) return;
 
-        api
-            .post(`/chat/rooms/${selectedRoomId}/messages`, {
-                content: text,
-            })
-            .catch((err) => {
-                console.log(
-                    "send message error",
-                    err.response?.status,
-                    err.response?.data
-                );
-            });
-
-        setInput("");
     };
 
     const messages = roomMessages[selectedRoomId] ?? [];

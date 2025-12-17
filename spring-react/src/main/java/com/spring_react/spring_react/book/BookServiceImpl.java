@@ -1,8 +1,6 @@
 package com.spring_react.spring_react.book;
 
-import com.spring_react.spring_react.command.BookVO;
-import com.spring_react.spring_react.book.BookMapper;
-import lombok.RequiredArgsConstructor;
+import com.spring_react.spring_react.command.MainBookVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,22 +14,8 @@ public class BookServiceImpl implements BookService {
     private BookMapper bookMapper;
 
     @Override
-    public List<BookVO> getBookList() {
-        return bookMapper.getBookList();
+    public List<MainBookVO> getMainBookList() {
+        return bookMapper.getMainBookList();
     }
 
-    @Override
-    public BookVO getBook(String id) {
-        return bookMapper.getBookById(id);
-    }
-
-    @Override
-    public void registerBook(BookVO bookVO) {
-        bookMapper.insertBook(bookVO);
-    }
-
-    @Override
-    public void removeBook(String id) {
-        bookMapper.deleteBook(id);
-    }
 }

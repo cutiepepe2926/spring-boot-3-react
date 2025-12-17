@@ -27,8 +27,12 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         const status = error.response?.status;
+        const requestUrl = error.config?.url;
 
-        if (status === 401 || status === 403) {
+        if (
+            (status === 401 || status === 403) &&
+            !requestUrl?.includes("/books/main")
+        ) {
             localStorage.removeItem("accessToken");
             sessionStorage.removeItem("accessToken");
             // 필요하면 alert 추가 가능
