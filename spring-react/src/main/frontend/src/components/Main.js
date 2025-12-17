@@ -24,6 +24,11 @@ function Main() {
     const loginId = getLoginIdFromToken();
 
     const [books, setBooks] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [searchInput, setSearchInput] = useState("");
+    const [searchKeyword, setSearchKeyword] = useState("");
+
+    const ITEMS_PER_PAGE = 8;
 
     const isLoggedIn = () => {
         return (
@@ -54,6 +59,15 @@ function Main() {
     useEffect(() => {
         fetchBooks();
     }, []);
+
+    const filteredBooks = books.filter((book) =>
+        book.title.toLowerCase().includes(searchKeyword.toLowerCase())
+    );
+
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const currentBooks = filteredBooks.slice(startIndex, endIndex);
+    const totalPages = Math.ceil(filteredBooks.length / ITEMS_PER_PAGE);
 
     return (
         <div className="page main-page">
@@ -119,13 +133,28 @@ function Main() {
                     <div className="content-header">
                         <h2>중고 도서 목록</h2>
                         <div className="search-box">
-                            <input className="search-input" placeholder="검색" />
-                            <button className="search-btn">검색</button>
+                            <input
+                                className="search-input"
+                                placeholder="검색"
+                                value={searchInput}
+                                onChange={(e) =>
+                                    setSearchInput(e.target.value)
+                                }
+                            />
+                            <button
+                                className="search-btn"
+                                onClick={() => {
+                                    setSearchKeyword(searchInput);
+                                    setCurrentPage(1);
+                                }}
+                            >
+                                검색
+                            </button>
                         </div>
                     </div>
 
                     <div className="book-list">
-                        {books.map((book) => (
+                        {currentBooks.map((book) => (
                             <div
                                 className="book-card"
                                 key={book.bookId}
@@ -156,15 +185,54 @@ function Main() {
                     </div>
 
                     <div className="pagination">
-                        <button className="page-btn">{`<<`}</button>
-                        <button className="page-btn">{`<`}</button>
-                        <button className="page-number active">1</button>
-                        <button className="page-number">2</button>
-                        <button className="page-number">3</button>
-                        <button className="page-number">4</button>
-                        <button className="page-number">5</button>
-                        <button className="page-btn">{`>`}</button>
-                        <button className="page-btn">{`>>`}</button>
+                        <button
+                            className="page-btn"
+                            disabled={currentPage === 1}
+                            onClick={() => setCurrentPage(1)}
+                        >
+                            {`<<`}
+                        </button>
+                        <button
+                            className="page-btn"
+                            disabled={currentPage === 1}
+                            onClick={() =>
+                                setCurrentPage((prev) => prev - 1)
+                            }
+                        >
+                            {`<`}
+                        </button>
+
+                        {Array.from(
+                            { length: totalPages },
+                            (_, i) => i + 1
+                        ).map((page) => (
+                            <button
+                                key={page}
+                                className={`page-number ${
+                                    currentPage === page ? "active" : ""
+                                }`}
+                                onClick={() => setCurrentPage(page)}
+                            >
+                                {page}
+                            </button>
+                        ))}
+
+                        <button
+                            className="page-btn"
+                            disabled={currentPage === totalPages}
+                            onClick={() =>
+                                setCurrentPage((prev) => prev + 1)
+                            }
+                        >
+                            {`>`}
+                        </button>
+                        <button
+                            className="page-btn"
+                            disabled={currentPage === totalPages}
+                            onClick={() => setCurrentPage(totalPages)}
+                        >
+                            {`>>`}
+                        </button>
                     </div>
                 </section>
             </div>
