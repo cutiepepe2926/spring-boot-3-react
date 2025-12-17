@@ -30,11 +30,11 @@ function Main() {
     };
 
     const handleChatClick = () => {
-        if (!isLoggedIn()) {
-            alert("로그인이 필요합니다.");
-            navigate("/auth/login");
-            return;
-        }
+        // if (!isLoggedIn()) {
+        //     alert("로그인이 필요합니다.");
+        //     navigate("/auth/login");
+        //     return;
+        // }
         navigate("/chat");
     };
 
