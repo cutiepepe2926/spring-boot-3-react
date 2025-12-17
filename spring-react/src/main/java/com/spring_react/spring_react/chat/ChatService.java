@@ -7,7 +7,8 @@ import java.util.List;
 
 public interface ChatService {
 
-    void createChatRoom(Long bookId, Long sellerId, Long buyerId);
+
+    ChatRoomVO createChatRoom(Long bookId, Long sellerId, Long buyerId);
 
     List<ChatRoomVO> getChatRoomList(Long userId);
 

@@ -6,26 +6,58 @@
 <mapper namespace="com.spring_react.spring_react.chat.ChatMapper">
 
     <!-- 채팅방 생성 -->
-    <insert id="insertChatRoom">
-        INSERT INTO chat_room (book_id, seller_id, buyer_id)
-        VALUES (#{param1}, #{param2}, #{param3})
+    <insert id="insertChatRoom"
+            parameterType="map"
+            useGeneratedKeys="true"
+            keyProperty="roomId">
+        INSERT INTO chat_room (
+            book_id,
+            seller_id,
+            buyer_id
+        )
+        VALUES (
+                   #{bookId},
+                   #{sellerId},
+                   #{buyerId}
+               )
     </insert>
 
-    <!-- 채팅방 목록 -->
-    <select id="getChatRoomList" parameterType="long" resultType="ChatRoomVO">
+    <!-- 팅방 단건 조회 -->
+    <select id="getChatRoomById"
+            parameterType="long"
+            resultType="ChatRoomVO">
         SELECT
-            cr.room_id         AS roomId,
-            b.book_id          AS bookId,
-            b.title            AS productName,
-            b.price            AS productPrice,
-            b.status           AS productStatus,
-            u.user_name        AS otherUserName,
+            cr.room_id   AS roomId,
+            cr.book_id   AS bookId,
+            b.title      AS productName,
+            b.price      AS productPrice,
+            b.status     AS productStatus,
+            u.user_name  AS otherUserName
+        FROM chat_room cr
+                 JOIN book b ON cr.book_id = b.book_id
+                 JOIN users u
+                      ON u.user_id = cr.seller_id
+        WHERE cr.room_id = #{roomId}
+    </select>
+
+    <!-- 채팅방 목록 -->
+    <select id="getChatRoomList"
+            parameterType="long"
+            resultType="ChatRoomVO">
+        SELECT
+            cr.room_id AS roomId,
+            b.book_id AS bookId,
+            b.title AS productName,
+            b.price AS productPrice,
+            b.status AS productStatus,
+            u.user_name AS otherUserName,
             DATE_FORMAT(MAX(cm.sent_at), '%Y-%m-%d %H:%i') AS lastTime
         FROM chat_room cr
                  JOIN book b ON cr.book_id = b.book_id
                  JOIN users u
                       ON u.user_id = CASE
-                                         WHEN cr.seller_id = #{userId} THEN cr.buyer_id
+                                         WHEN cr.seller_id = #{userId}
+                                             THEN cr.buyer_id
                                          ELSE cr.seller_id
                           END
                  LEFT JOIN chat_message cm ON cr.room_id = cm.room_id
@@ -36,7 +68,9 @@
     </select>
 
     <!-- 채팅 메시지 목록 -->
-    <select id="getChatMessages" parameterType="long" resultType="ChatVO">
+    <select id="getChatMessages"
+            parameterType="long"
+            resultType="ChatVO">
         SELECT
             message_id AS messageId,
             room_id    AS roomId,
@@ -49,9 +83,18 @@
     </select>
 
     <!-- 메시지 전송 -->
-    <insert id="insertChatMessage" parameterType="ChatVO">
-        INSERT INTO chat_message (room_id, sender_id, content)
-        VALUES (#{roomId}, #{senderId}, #{content})
+    <insert id="insertChatMessage"
+            parameterType="ChatVO">
+        INSERT INTO chat_message (
+            room_id,
+            sender_id,
+            content
+        )
+        VALUES (
+                   #{roomId},
+                   #{senderId},
+                   #{content}
+               )
     </insert>
 
 </mapper>
