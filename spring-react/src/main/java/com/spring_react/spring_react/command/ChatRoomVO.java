@@ -11,6 +11,8 @@ public class ChatRoomVO {
 
     private Long roomId;
     private Long bookId;
+    private Long sellerId;
+    private Long buyerId;
 
     private String productName;
     private int productPrice;
@@ -18,5 +20,4 @@ public class ChatRoomVO {
 
     private String otherUserName;
     private String lastTime;
-
 }

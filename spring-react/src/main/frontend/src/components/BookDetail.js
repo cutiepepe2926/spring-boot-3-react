@@ -1,9 +1,30 @@
 import "./BookDetail.css";
 import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import api from "../api/api";
 
 function BookDetail() {
     const navigate = useNavigate();
     const { id } = useParams(); // bookId
+    const [book, setBook] = useState({});
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchBookDetail = async () => {
+            try {
+                const res = await api.get(`/api/books/${id}`);
+                setBook(res.data);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBookDetail();
+    }, [id]);
+
+    if (loading) return <div className="page-wrap"></div>;
 
     return (
         <div className="page-wrap">
@@ -47,7 +68,7 @@ function BookDetail() {
                                     navigate("/chat", {
                                         state: {
                                             bookId: id,
-                                            sellerId: 2, // 실제 판매자 ID
+                                            sellerId: book.userId,
                                         },
                                     })
                                 }

@@ -20,18 +20,16 @@ public class ChatServiceImpl implements ChatService {
     @Transactional
     public ChatRoomVO createChatRoom(Long bookId, Long sellerId, Long buyerId) {
 
-        // 1. 채팅방 생성
-        chatMapper.insertChatRoom(bookId, sellerId, buyerId);
+        ChatRoomVO vo = new ChatRoomVO();
+        vo.setBookId(bookId);
+        vo.setSellerId(sellerId);
+        vo.setBuyerId(buyerId);
 
-        // 2. 방금 생성된 roomId 조회
-        // ⚠️ MyBatis에서 useGeneratedKeys 사용 전제
-        Long roomId = chatMapper
-                .getChatRoomList(buyerId)
-                .get(0)
-                .getRoomId();
+        // insertChatRoom 실행 시 XML의 useGeneratedKeys에 의해 vo.roomId에 값이 들어감
+        chatMapper.insertChatRoom(vo);
 
-        // 3. 생성된 채팅방 반환
-        return chatMapper.getChatRoomById(roomId);
+        // 생성된 roomId를 사용하여 전체 정보(상품명, 닉네임 등)가 포함된 데이터 조회
+        return chatMapper.getChatRoomById(vo.getRoomId(), buyerId);
     }
 
     @Override
@@ -45,6 +43,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
+    @Transactional
     public void sendMessage(ChatVO chatVO) {
         chatMapper.insertChatMessage(chatVO);
     }

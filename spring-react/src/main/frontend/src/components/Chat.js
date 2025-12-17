@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import SockJS from "sockjs-client";
+import { useNavigate, useLocation } from "react-router-dom";
 import api from "../api/api";
 import "./Chat.css";
 
@@ -25,20 +24,11 @@ function getLoginIdFromToken() {
 
 function Chat() {
     const navigate = useNavigate();
+    const location = useLocation();
     const socketRef = useRef(null);
 
     const loginId = getLoginIdFromToken();
     const token = getToken();
-
-    useEffect(() => {
-
-        if (!token || !loginId) {
-            alert("로그인 후 이용 가능합니다.");
-            navigate("/auth/login", { replace: true });
-            return;
-        }
-
-    }, [token, loginId, navigate]);
 
     const [rooms, setRooms] = useState([]);
     const [filter, setFilter] = useState("전체");
@@ -46,10 +36,57 @@ function Chat() {
     const [roomMessages, setRoomMessages] = useState({});
     const [input, setInput] = useState("");
 
+    useEffect(() => {
+        if (!token || !loginId) {
+            alert("로그인 후 이용 가능합니다.");
+            navigate("/auth/login", { replace: true });
+            return;
+        }
+    }, [token, loginId, navigate]);
+
     /* 채팅방 목록 */
     useEffect(() => {
+        if (!loginId) return;
 
-    }, [loginId]);
+        const initChat = async () => {
+            try {
+                const res = await api.get(`/api/chat/rooms?userId=${loginId}`);
+                let currentRooms = res.data;
+                setRooms(currentRooms);
+
+                if (location.state && location.state.bookId) {
+                    const targetBookId = Number(location.state.bookId);
+                    const targetSellerId = Number(location.state.sellerId);
+
+                    const existingRoom = currentRooms.find(
+                        (r) => Number(r.bookId) === targetBookId &&
+                            (Number(r.sellerId) === targetSellerId || Number(r.buyerId) === targetSellerId)
+                    );
+
+                    if (existingRoom) {
+                        setSelectedRoomId(existingRoom.roomId);
+                    } else {
+                        const createRes = await api.post("/api/chat/rooms", {
+                            bookId: targetBookId,
+                            sellerId: targetSellerId,
+                            buyerId: Number(loginId),
+                        });
+
+                        if (createRes.data) {
+                            const newRoom = createRes.data;
+                            setRooms((prev) => [newRoom, ...prev]);
+                            setSelectedRoomId(newRoom.roomId);
+                        }
+                    }
+                    navigate(location.pathname, { replace: true, state: {} });
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        initChat();
+    }, [loginId, location.state, navigate]);
 
     const selectedRoom = useMemo(() => {
         return rooms.find((r) => r.roomId === selectedRoomId);
@@ -57,17 +94,54 @@ function Chat() {
 
     const filteredRooms = useMemo(() => {
         if (filter === "전체") return rooms;
-        return rooms.filter((r) => r.type === filter);
-    }, [filter, rooms]);
+        return rooms.filter((r) => {
+            if (filter === "판매") return String(r.sellerId) === String(loginId);
+            if (filter === "구매") return String(r.buyerId) === String(loginId);
+            return true;
+        });
+    }, [filter, rooms, loginId]);
 
     /* 메시지 조회 */
     useEffect(() => {
+        if (!selectedRoomId) return;
 
+        const fetchMessages = async () => {
+            try {
+                const res = await api.get(`/api/chat/rooms/${selectedRoomId}/messages`);
+                setRoomMessages((prev) => ({
+                    ...prev,
+                    [selectedRoomId]: res.data,
+                }));
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        fetchMessages();
     }, [selectedRoomId]);
 
     /* 메시지 전송 */
-    const handleSend = () => {
+    const handleSend = async () => {
+        if (!input.trim() || !selectedRoomId) return;
 
+        try {
+            const messageData = {
+                senderId: loginId,
+                content: input,
+            };
+
+            await api.post(`/api/chat/rooms/${selectedRoomId}/messages`, messageData);
+
+            setInput("");
+
+            const res = await api.get(`/api/chat/rooms/${selectedRoomId}/messages`);
+            setRoomMessages((prev) => ({
+                ...prev,
+                [selectedRoomId]: res.data,
+            }));
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     const messages = roomMessages[selectedRoomId] ?? [];
@@ -128,7 +202,7 @@ function Chat() {
                                             {room.otherUserName}
                                         </p>
                                         <p className="last-message">
-                                            {room.lastMessage}
+                                            {room.lastMessage || "대화를 시작해 보세요."}
                                         </p>
                                     </div>
 
@@ -181,7 +255,7 @@ function Chat() {
                                             {selectedRoom.productName}
                                         </span>
                                         <p className="product-price">
-                                            {selectedRoom.productPrice}원
+                                            {selectedRoom.productPrice?.toLocaleString()}원
                                         </p>
                                     </div>
                                 </div>
@@ -193,11 +267,11 @@ function Chat() {
                                         </div>
                                     )}
 
-                                    {messages.map((msg) => (
+                                    {messages.map((msg, idx) => (
                                         <div
-                                            key={msg.messageId}
+                                            key={msg.messageId || idx}
                                             className={`message ${
-                                                msg.senderId === loginId
+                                                String(msg.senderId) === String(loginId)
                                                     ? "me"
                                                     : "other"
                                             }`}
