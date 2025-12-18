@@ -29,7 +29,13 @@ public class ChatServiceImpl implements ChatService {
         chatMapper.insertChatRoom(vo);
 
         // 생성된 roomId를 사용하여 전체 정보(상품명, 닉네임 등)가 포함된 데이터 조회
-        return chatMapper.getChatRoomById(vo.getRoomId(), buyerId);
+        ChatRoomVO result = chatMapper.getChatRoomById(vo.getRoomId(), buyerId);
+
+        if (result == null) {
+            return vo;
+        }
+
+        return result;
     }
 
     @Override

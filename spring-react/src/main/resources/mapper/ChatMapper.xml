@@ -35,9 +35,7 @@
         WHERE cr.room_id = #{roomId}
     </select>
 
-    <select id="getChatRoomList"
-            parameterType="long"
-            resultType="com.spring_react.spring_react.command.ChatRoomVO">
+    <select id="getChatRoomList" parameterType="long" resultType="com.spring_react.spring_react.command.ChatRoomVO">
         SELECT
             cr.room_id AS roomId,
             cr.book_id AS bookId,
@@ -47,21 +45,18 @@
             b.price AS productPrice,
             b.status AS productStatus,
             u.user_name AS otherUserName,
-            DATE_FORMAT(MAX(cm.sent_at), '%Y-%m-%d %H:%i') AS lastTime
+            IFNULL(DATE_FORMAT(MAX(cm.sent_at), '%Y-%m-%d %H:%i'), '방금 생성됨') AS lastTime
         FROM chat_room cr
                  JOIN book b ON cr.book_id = b.book_id
-                 JOIN users u
-                      ON u.user_id = CASE
-                                         WHEN cr.seller_id = #{userId}
-                                             THEN cr.buyer_id
-                                         ELSE cr.seller_id
-                          END
+                 JOIN users u ON u.user_id = CASE
+                                                 WHEN cr.seller_id = #{userId} THEN cr.buyer_id
+                                                 ELSE cr.seller_id
+            END
                  LEFT JOIN chat_message cm ON cr.room_id = cm.room_id
-        WHERE cr.seller_id = #{userId}
-           OR cr.buyer_id  = #{userId}
+        WHERE cr.seller_id = #{userId} OR cr.buyer_id = #{userId}
         GROUP BY cr.room_id, cr.book_id, cr.seller_id, cr.buyer_id, b.title, b.price, b.status, u.user_name
-        ORDER BY lastTime DESC
-    </select>
+        ORDER BY MAX(cm.sent_at) DESC, cr.room_id DESC
+        </select>
 
     <select id="getChatMessages" parameterType="long" resultType="com.spring_react.spring_react.command.ChatVO">
         SELECT

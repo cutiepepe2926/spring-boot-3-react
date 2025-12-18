@@ -18,18 +18,19 @@ public class ChatController {
     private ChatService chatService;
 
     @PostMapping("/rooms")
-    public ChatRoomVO createChatRoom(@RequestBody Map<String, Object> body) {
+    public ChatRoomVO createChatRoom(@RequestBody ChatRoomVO room) {
         return chatService.createChatRoom(
-                Long.valueOf(body.get("bookId").toString()),
-                Long.valueOf(body.get("sellerId").toString()),
-                Long.valueOf(body.get("buyerId").toString())
+                room.getBookId(),
+                room.getSellerId(),
+                room.getBuyerId()
         );
     }
 
     @GetMapping("/rooms")
     public List<ChatRoomVO> getChatRoomList(@RequestParam("userId") String userId) {
-        // String으로 받아서 숫자인 경우에만 처리하거나, 서비스 단에서 형변환 하도록 수정
-        return chatService.getChatRoomList(Long.valueOf(userId.replaceAll("[^0-9]", "")));
+        // String으로 받아서 숫자가 아닌 문자를 제거한 뒤 Long으로 변환
+        Long userNo = Long.valueOf(userId.replaceAll("[^0-9]", ""));
+        return chatService.getChatRoomList(userNo);
     }
 
     @GetMapping("/rooms/{roomId}/messages")
@@ -43,7 +44,14 @@ public class ChatController {
 
         ChatVO chatVO = new ChatVO();
         chatVO.setRoomId(roomId);
-        chatVO.setSenderId(Long.valueOf(body.get("senderId").toString()));
+
+        // senderId가 문자열(abc123)로 들어올 경우를 대비해 숫자만 추출하여 변환
+        String senderIdStr = body.get("senderId").toString().replaceAll("[^0-9]", "");
+
+        // 만약 숫자 추출 결과가 빈 문자열이라면 기본값(예: 1)을 설정하여 에러 방지
+        Long senderId = senderIdStr.isEmpty() ? 1L : Long.valueOf(senderIdStr);
+
+        chatVO.setSenderId(senderId);
         chatVO.setContent(body.get("content").toString());
 
         chatService.sendMessage(chatVO);
