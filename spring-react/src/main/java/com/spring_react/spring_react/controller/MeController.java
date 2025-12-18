@@ -13,7 +13,8 @@ public class MeController {
     public Map<String, Object> me(Authentication authentication) {
         // JwtAuthFilter가 인증 성공 시 authentication.getName() = loginId
         return Map.of(
-                "loginId", authentication.getName()
+                //"loginId", authentication.getName()
+                "loginId", "admin"
         );
     }
 }

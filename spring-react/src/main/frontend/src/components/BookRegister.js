@@ -10,18 +10,27 @@ function BookRegister() {
     const [title, setTitle] = useState("");
     const [price, setPrice] = useState("");
     const [description, setDescription] = useState("");
+    const [imageFile, setImageFile] = useState(null);
+
 
 
     const handleSubmit = async () => {
         try {
-            await api.post("/books", {
-                title: title,
-                price: price,
-                description: description
+            const formData = new FormData();
+
+            formData.append("title", title);
+            formData.append("price", Number(price));
+            formData.append("description", description);
+            formData.append("image", imageFile); // 📷 선택한 파일
+
+            await api.post("/books", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
             });
 
             alert("도서가 성공적으로 등록되었습니다!");
-            navigate("/"); // 메인으로 이동
+            navigate("/");
         } catch (e) {
             alert("등록 실패");
             console.error(e);
@@ -29,12 +38,25 @@ function BookRegister() {
     };
 
 
+
   return (
     <div className="register-container">
       <div className="form-grid">
-        <div className="image-box">📷</div>
+          <div className="image-box">
+              <label htmlFor="imageUpload" style={{ cursor: "pointer" }}>
+                  {imageFile ? imageFile.name : "📷 사진 등록"}
+              </label>
+              <input
+                  id="imageUpload"
+                  type="file"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={(e) => setImageFile(e.target.files[0])}
+              />
+          </div>
 
-        <div className="form-area">
+
+          <div className="form-area">
             <input
                 type="text"
                 placeholder="제목을 입력해주세요."

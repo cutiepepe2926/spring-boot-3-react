@@ -6,12 +6,13 @@
 <mapper namespace="com.spring_react.spring_react.bookregister.BookRegisterMapper">
 
 
-    <insert id="insertBook">
+    <insert id="insertBook" useGeneratedKeys="true" keyProperty="bookId">
         INSERT INTO book
             (seller_id, title, seller_name, price, description, status)
         VALUES
             (#{sellerId}, #{title}, #{sellerName}, #{price}, #{description}, '판매중')
     </insert>
+
 
     <select id="findAllBooks"
             resultType="com.spring_react.spring_react.command.BookRegisterVO">
@@ -19,5 +20,7 @@
         FROM book
         ORDER BY create_at DESC
     </select>
+
+
 
 </mapper>

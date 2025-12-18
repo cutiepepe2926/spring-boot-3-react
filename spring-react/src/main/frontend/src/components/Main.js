@@ -23,11 +23,16 @@ function Main() {
         });
   }, []);
 
-  // useEffect(() => {
-  //   api.get("/books")
-  //       .then(res => setBooks(res.data))
-  //       .catch(err => console.error(err));
-  // }, []);
+  useEffect(() => {
+    api.get("/books")
+        .then(res => {
+          setBooks(res.data);
+        })
+        .catch(err => {
+          console.error(err);
+        });
+  }, []);
+
 
 
 
@@ -118,7 +123,7 @@ function Main() {
           {bookList.map((book) => (
               <div
                   className="book-card"
-                  key={book.id}
+                  key={book.bookId}
                   onClick={() => openModal(book)} // 클릭 시 모달 열기
                   style={{ cursor: "pointer" }}
               >
