@@ -21,7 +21,6 @@ function BookDetail({ book, onClose }) {
               <h4>도서 정보</h4>
               <p>{book.description || "상세 정보 없음"}</p>
               <div className="btn-box">
-                <button className="btn btn-save">찜하기</button>
                 <button className="btn btn-talk">구매하기</button>
               </div>
               <button className="modal-close" onClick={onClose}>닫기</button>

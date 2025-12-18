@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.spring_react.spring_react.bookregister.BookRegisterMapper">
+
+
+    <insert id="insertBook">
+        INSERT INTO book
+            (seller_id, title, seller_name, price, description, status)
+        VALUES
+            (#{sellerId}, #{title}, #{sellerName}, #{price}, #{description}, '판매중')
+    </insert>
+
+    <select id="findAllBooks"
+            resultType="com.spring_react.spring_react.command.BookRegisterVO">
+        SELECT *
+        FROM book
+        ORDER BY create_at DESC
+    </select>
+
+</mapper>
