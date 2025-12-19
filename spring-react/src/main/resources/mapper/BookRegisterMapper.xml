@@ -8,9 +8,11 @@
 
     <insert id="insertBook" useGeneratedKeys="true" keyProperty="bookId">
         INSERT INTO book
-            (seller_id, title, seller_name, price, description, status)
+        (seller_id, title, seller_name, author, publisher, price, description, status)
         VALUES
-            (#{sellerId}, #{title}, #{sellerName}, #{price}, #{description}, '판매중')
+            (#{sellerId}, #{title}, #{sellerName}, #{author}, #{publisher},
+             #{price}, #{description}, '판매중')
+
     </insert>
 
 

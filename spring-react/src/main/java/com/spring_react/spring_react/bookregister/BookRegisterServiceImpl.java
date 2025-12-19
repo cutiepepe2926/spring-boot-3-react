@@ -11,6 +11,7 @@ import java.util.List;
 public class BookRegisterServiceImpl implements BookRegisterService {
 
     private final BookRegisterMapper mapper;
+    private final BookImageMapper bookImageMapper; // ✅ 추가
 
     @Override
     public void registerBook(BookRegisterVO book) {
@@ -19,7 +20,15 @@ public class BookRegisterServiceImpl implements BookRegisterService {
 
     @Override
     public List<BookRegisterVO> getBookList() {
-        return mapper.findAllBooks();
+        List<BookRegisterVO> books = mapper.findAllBooks();
+
+        // 🔥 여기 추가
+        for (BookRegisterVO book : books) {
+            String imageUrl =
+                    bookImageMapper.selectThumbnailByBookId(book.getBookId());
+            book.setImageUrl(imageUrl);
+        }
+
+        return books;
     }
 }
-

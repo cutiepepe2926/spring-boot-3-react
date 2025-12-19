@@ -12,4 +12,5 @@ public interface BookImageMapper {
             @Param("imageUrl") String imageUrl,
             @Param("isThumbnail") boolean isThumbnail
     );
+    String selectThumbnailByBookId(@Param("bookId") Integer bookId);
 }

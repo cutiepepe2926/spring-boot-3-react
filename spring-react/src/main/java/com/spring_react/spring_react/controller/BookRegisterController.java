@@ -27,6 +27,8 @@ public class BookRegisterController {
     @PostMapping("/books")
     public ResponseEntity<Void> register(
             @RequestParam String title,
+            @RequestParam String author,
+            @RequestParam String publisher,
             @RequestParam Integer price,
             @RequestParam String description,
             @RequestParam MultipartFile image
@@ -44,6 +46,8 @@ public class BookRegisterController {
         // 2️⃣ 책 정보 저장
         BookRegisterVO book = new BookRegisterVO();
         book.setTitle(title);
+        book.setAuthor(author);
+        book.setPublisher(publisher);
         book.setPrice(price);
         book.setDescription(description);
         book.setSellerId(1);

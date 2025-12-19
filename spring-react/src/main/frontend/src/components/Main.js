@@ -127,8 +127,17 @@ function Main() {
                   onClick={() => openModal(book)} // 클릭 시 모달 열기
                   style={{ cursor: "pointer" }}
               >
-              <img className="book-image" alt="책 이미지" />
-              <div className="book-info">
+                <img
+                    className="book-image"
+                    src={
+                      book.imageUrl
+                          ? `http://localhost:8080${book.imageUrl}`
+                          : "/book.webp"
+                    }
+                    alt={book.title}
+                />
+
+                <div className="book-info">
                 <p className="book-title">{book.title}</p>
                 <div className="book-meta">
                   <span className="book-price">{book.price}원</span>

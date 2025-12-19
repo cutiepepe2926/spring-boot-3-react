@@ -25,4 +25,8 @@ public class BookRegisterVO {
     private String description;
     private String status;
     private LocalDateTime createAt;
+    private String imageUrl;
+    private String author;
+    private String publisher;
+
 }

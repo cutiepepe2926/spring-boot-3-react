@@ -6,15 +6,24 @@ import api from "../api/api";
 
 function BookRegister() {
     const navigate = useNavigate();
-
     const [title, setTitle] = useState("");
     const [price, setPrice] = useState("");
     const [description, setDescription] = useState("");
     const [imageFile, setImageFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
+    const [author, setAuthor] = useState("");
+    const [publisher, setPublisher] = useState("");
+
+
 
 
 
     const handleSubmit = async () => {
+        if (!imageFile) {
+            alert("이미지를 선택해주세요");
+            return;
+        }
+
         try {
             const formData = new FormData();
 
@@ -22,6 +31,8 @@ function BookRegister() {
             formData.append("price", Number(price));
             formData.append("description", description);
             formData.append("image", imageFile); // 📷 선택한 파일
+            formData.append("author", author);
+            formData.append("publisher", publisher);
 
             await api.post("/books", formData, {
                 headers: {
@@ -43,15 +54,33 @@ function BookRegister() {
     <div className="register-container">
       <div className="form-grid">
           <div className="image-box">
-              <label htmlFor="imageUpload" style={{ cursor: "pointer" }}>
-                  {imageFile ? imageFile.name : "📷 사진 등록"}
+              <label htmlFor="imageUpload" className="image-label">
+                  {previewUrl ? (
+                      <img
+                          src={previewUrl}
+                          alt="미리보기"
+                          className="preview-image"
+                      />
+                  ) : (
+                      <span>📷 사진 등록</span>
+                  )}
               </label>
+
               <input
                   id="imageUpload"
                   type="file"
                   accept="image/*"
                   style={{ display: "none" }}
-                  onChange={(e) => setImageFile(e.target.files[0])}
+                  onChange={(e) => {
+                      const file = e.target.files[0];
+                      setImageFile(file);
+
+                      if (file) {
+                          const imageUrl = URL.createObjectURL(file);
+                          setPreviewUrl(imageUrl);
+                      }
+                  }}
+
               />
           </div>
 
@@ -63,8 +92,20 @@ function BookRegister() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
             />
-          <input type="text" placeholder="작가명을 입력해주세요." />
-          <input type="text" placeholder="출판사를 입력해주세요." />
+              <input
+                  type="text"
+                  placeholder="작가명을 입력해주세요."
+                  value={author}
+                  onChange={(e) => setAuthor(e.target.value)}
+              />
+
+              <input
+                  type="text"
+                  placeholder="출판사를 입력해주세요."
+                  value={publisher}
+                  onChange={(e) => setPublisher(e.target.value)}
+              />
+
             <input
                 type="text"
                 placeholder="가격을 입력해주세요."

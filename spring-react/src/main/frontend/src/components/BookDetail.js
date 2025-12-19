@@ -7,14 +7,21 @@ function BookDetail({ book, onClose }) {
         <div className="modal-content" onClick={e => e.stopPropagation()}>
           <div className="detail-box">
             <div className="book-img">
-              <img src="/book.webp" alt={book.title} />
+              <img
+                  src={
+                    book.imageUrl
+                        ? `http://localhost:8080${book.imageUrl}`
+                        : "/book.webp"
+                  }
+                  alt={book.title}
+              />
+
             </div>
             <div className="book-info">
               <h2>{book.title}</h2>
               <div className="meta">
                 저자 : {book.author || "미상"}<br />
                 출판사 : {book.publisher || "미상"}<br />
-                출간일 : {book.date}
               </div>
               <div className="price">{book.price}</div>
               <div className="divider"></div>
