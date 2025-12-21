@@ -1,18 +1,17 @@
 package com.spring_react.spring_react.chat;
 
+import com.spring_react.spring_react.command.ChatMessageVO;
 import com.spring_react.spring_react.command.ChatRoomVO;
-import com.spring_react.spring_react.command.ChatVO;
 
 import java.util.List;
 
 public interface ChatService {
 
+    List<ChatRoomVO> getChatRooms(String loginId);
 
-    ChatRoomVO createChatRoom(Long bookId, Long sellerId, Long buyerId);
+    ChatRoomVO getOrCreateRoom(String loginId, ChatRoomVO vo);
 
-    List<ChatRoomVO> getChatRoomList(Long userId);
+    List<ChatMessageVO> getMessages(int roomId, String loginId);
 
-    List<ChatVO> getChatMessages(Long roomId);
-
-    void sendMessage(ChatVO chatVO);
+    void sendMessage(ChatMessageVO vo, String loginId);
 }

@@ -1,81 +1,55 @@
+// BookDetail.jsx
 import "./BookDetail.css";
-import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
-import api from "../api/api";
+import { useNavigate } from "react-router-dom";
 
-function BookDetail() {
+function BookDetail({ book, onClose }) {
+
     const navigate = useNavigate();
-    const { id } = useParams(); // bookId
-    const [book, setBook] = useState({});
-    const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchBookDetail = async () => {
-            try {
-                const res = await api.get(`/api/books/${id}`);
-                setBook(res.data);
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchBookDetail();
-    }, [id]);
-
-    if (loading) return <div className="page-wrap"></div>;
 
     return (
-        <div className="page-wrap">
-            <div className="container">
-                <h3 style={{ fontSize: "20px", marginBottom: "25px" }}>
-                    도서 상세 정보 - ID: {id}
-                </h3>
-
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
                 <div className="detail-box">
                     <div className="book-img">
-                        <img src="/book.webp" alt="book" />
+                        <img
+                            src={
+                                book.imageUrl
+                                    ? `http://localhost:8080${book.imageUrl}`
+                                    : "/book.webp"
+                            }
+                            alt={book.title}
+                        />
                     </div>
 
                     <div className="book-info">
-                        <h2>건축너머 비평너머</h2>
-
+                        <h2>{book.title}</h2>
                         <div className="meta">
-                            저자 : 박영민<br />
-                            출판사 : 안그라픽스<br />
-                            출간일 : 2024년 01월 31일
+                            저자 : {book.author || "미상"}<br />
+                            출판사 : {book.publisher || "미상"}<br />
                         </div>
-
-                        <div className="price">8,000원</div>
-
-                        <div className="divider" />
-
+                        <div className="price">{book.price}</div>
+                        <div className="divider"></div>
                         <h4>도서 정보</h4>
-                        <p>
-                            건축너머 비평너머 책입니다.
-                            <br />
-                            개인 의견이 포함돼 있을 수 있습니다.
-                            <br />
-                            하단 안내가 읽기 좋았습니다.
-                        </p>
+                        <p>{book.description || "상세 정보 없음"}</p>
 
                         <div className="btn-box">
-                            <button className="btn btn-save">찜하기</button>
                             <button
                                 className="btn btn-talk"
-                                onClick={() =>
+                                onClick={() => {
                                     navigate("/chat", {
                                         state: {
-                                            bookId: id,
-                                            sellerId: book.userId,
+                                            bookId: book.bookId,
+                                            sellerId: book.sellerId,
                                         },
-                                    })
-                                }
+                                    });
+                                }}
                             >
                                 구매하기
                             </button>
                         </div>
+
+                        <button className="modal-close" onClick={onClose}>닫기</button>
                     </div>
                 </div>
             </div>

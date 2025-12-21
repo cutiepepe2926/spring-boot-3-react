@@ -1,18 +1,28 @@
 package com.spring_react.spring_react.chat;
 
+import com.spring_react.spring_react.command.ChatMessageVO;
 import com.spring_react.spring_react.command.ChatRoomVO;
-import com.spring_react.spring_react.command.ChatVO;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
+
 import java.util.List;
 
 @Mapper
 public interface ChatMapper {
-    int insertChatRoom(ChatRoomVO chatRoomVO);
 
-    ChatRoomVO getChatRoomById(@Param("roomId") Long roomId, @Param("userId") Long userId);
+    // 채팅방 목록
+    List<ChatRoomVO> getChatRooms(int userId);
 
-    List<ChatRoomVO> getChatRoomList(Long userId);
-    List<ChatVO> getChatMessages(Long roomId);
-    int insertChatMessage(ChatVO chatVO);
+    // 채팅방 단건 조회
+    ChatRoomVO selectChatRoom(ChatRoomVO vo);
+
+    // 채팅방 생성
+    void insertChatRoom(ChatRoomVO vo);
+
+    // 메시지 목록
+    List<ChatMessageVO> selectMessagesByRoomId(int roomId);
+
+    // 메시지 저장
+    void insertChatMessage(ChatMessageVO vo);
+
+    ChatRoomVO getChatRoomDetail(int roomId);
 }

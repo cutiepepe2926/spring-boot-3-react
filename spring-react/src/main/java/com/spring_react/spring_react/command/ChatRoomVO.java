@@ -1,23 +1,26 @@
 package com.spring_react.spring_react.command;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class ChatRoomVO {
 
-    private Long roomId;
-    private Long bookId;
-    private Long sellerId;
-    private Long buyerId;
+    private int roomId;
+    private int bookId;
+    private int sellerId;
+    private int buyerId;
+    private LocalDateTime createdAt;
 
-    private String productName;
-    private int productPrice;
-    private String productStatus;
+    private String sellerLoginId;
+    private String buyerLoginId;
 
-    private String otherUserName;
+    private String lastMessage;
     private String lastTime;
+    private String productStatus;
+    private String bookTitle;
+    private int price;
+
+    private String imageUrl;
 }
+

@@ -2,10 +2,15 @@ package com.spring_react.spring_react.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.List;
 
 //로그인 성공 시 Access JWT 문자열을 만들어서 반환하는 “토큰 발급기”
 
@@ -43,5 +48,21 @@ public class JwtProvider {
                 .withExpiresAt(expiresAt) //만료시간
                 .sign(algorithm);
                 // 서명된 JWT 문자열을 만들어 반환
+    }
+
+    public Authentication getAuthentication(String token) {
+
+        DecodedJWT decodedJWT = JWT.require(algorithm)
+                .withIssuer(issuer)
+                .build()
+                .verify(token);
+
+        String loginId = decodedJWT.getSubject();
+
+        return new UsernamePasswordAuthenticationToken(
+                loginId,
+                null,
+                List.of(new SimpleGrantedAuthority("ROLE_USER"))
+        );
     }
 }

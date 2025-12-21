@@ -2,126 +2,92 @@ import "./Main.css";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../api/api";
-
-function getLoginIdFromToken() {
-    const token =
-        localStorage.getItem("accessToken") ||
-        sessionStorage.getItem("accessToken");
-
-    if (!token) return null;
-
-    try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        return payload.sub;
-    } catch (e) {
-        console.error("JWT 파싱 실패", e);
-        return null;
-    }
-}
+import BookDetail from "./BookDetail";
 
 function Main() {
     const navigate = useNavigate();
-    const loginId = getLoginIdFromToken();
 
+    const [loginId, setLoginId] = useState(null);
+    const [selectedBook, setSelectedBook] = useState(null);
     const [books, setBooks] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
+
     const [searchInput, setSearchInput] = useState("");
     const [searchKeyword, setSearchKeyword] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
 
     const ITEMS_PER_PAGE = 8;
 
-    const isLoggedIn = () => {
-        return (
-            localStorage.getItem("accessToken") ||
-            sessionStorage.getItem("accessToken")
-        );
-    };
+    useEffect(() => {
+        api.get("/me")
+            .then(res => setLoginId(res.data.loginId))
+            .catch(() => {
+                localStorage.removeItem("accessToken");
+                sessionStorage.removeItem("accessToken");
+                setLoginId(null);
+            });
+    }, []);
+
+    useEffect(() => {
+        api.get("/books")
+            .then(res => {
+                setBooks(res.data);
+            })
+            .catch(err => {
+                console.error(err);
+            });
+    }, []);
 
     const handleLogout = () => {
         localStorage.removeItem("accessToken");
         sessionStorage.removeItem("accessToken");
-        navigate("/");
+        setLoginId(null);
+        navigate("/auth/login");
     };
 
-    const handleChatClick = () => {
-        navigate("/chat");
+    const openModal = (book) => {
+        setSelectedBook(book);
     };
 
-    const fetchBooks = async () => {
-        try {
-            const res = await api.get("/books/main");
-            setBooks(res.data);
-        } catch (err) {
-            console.error("도서 목록 조회 실패", err);
-        }
+    const closeModal = () => {
+        setSelectedBook(null);
     };
 
-    useEffect(() => {
-        fetchBooks();
-    }, []);
-
-    const filteredBooks = books.filter((book) =>
+    const filteredBooks = books.filter(book =>
         book.title.toLowerCase().includes(searchKeyword.toLowerCase())
+    );
+
+    const bookList = [...filteredBooks].sort(
+        (a, b) => new Date(b.createAt) - new Date(a.createAt)
     );
 
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
-    const currentBooks = filteredBooks.slice(startIndex, endIndex);
-    const totalPages = Math.ceil(filteredBooks.length / ITEMS_PER_PAGE);
+    const currentBooks = bookList.slice(startIndex, endIndex);
+    const totalPages = Math.ceil(bookList.length / ITEMS_PER_PAGE);
 
     return (
-        <div className="page main-page">
+        <div className="page">
+
+            <div className="header-top">
+                <div className="logo" style={{ color: "#00FF00" }}>책의 온도</div>
+                <div className="header-buttons">
+                    <button className="header-btn" onClick={() => navigate("/chat")}>
+                        채팅방
+                    </button>
+                    {loginId ? (
+                        <>
+                            <div style={{ color: "#00FF00" }}>{loginId}님</div>
+                            <button className="header-btn" onClick={handleLogout}>로그아웃</button>
+                        </>
+                    ) : (
+                        <>
+                            <button className="header-btn" onClick={() => navigate("/auth/login")}>로그인</button>
+                            <button className="header-btn signup" onClick={() => navigate("/auth/register")}>회원가입</button>
+                        </>
+                    )}
+                </div>
+            </div>
             <div className="container">
-                <header className="header">
-                    <div className="header-inner">
-                        <div className="logo" style={{ color: "#00FF00" }}>
-                            책의 온도
-                        </div>
-
-                        <div className="header-right">
-                            <button
-                                className="header-btn"
-                                onClick={handleChatClick}
-                            >
-                                채팅방
-                            </button>
-
-                            {isLoggedIn() && loginId ? (
-                                <div className="login-info">
-                                    <span className="welcome-text">
-                                        {loginId}님 환영합니다
-                                    </span>
-                                    <button
-                                        className="header-btn logout"
-                                        onClick={handleLogout}
-                                    >
-                                        로그아웃
-                                    </button>
-                                </div>
-                            ) : (
-                                <>
-                                    <button
-                                        className="header-btn"
-                                        onClick={() =>
-                                            navigate("/auth/login")
-                                        }
-                                    >
-                                        로그인
-                                    </button>
-                                    <button
-                                        className="header-btn signup"
-                                        onClick={() =>
-                                            navigate("/auth/register")
-                                        }
-                                    >
-                                        회원가입
-                                    </button>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                </header>
-
                 <section className="hero">
                     <div className="hero-overlay">
                         <h1>함께 읽고 나누는 독서 활동</h1>
@@ -137,9 +103,7 @@ function Main() {
                                 className="search-input"
                                 placeholder="검색"
                                 value={searchInput}
-                                onChange={(e) =>
-                                    setSearchInput(e.target.value)
-                                }
+                                onChange={(e) => setSearchInput(e.target.value)}
                             />
                             <button
                                 className="search-btn"
@@ -150,6 +114,20 @@ function Main() {
                             >
                                 검색
                             </button>
+                            <button
+                                className="register-btn"
+                                onClick={() => {
+                                    if (!loginId) {
+                                        alert("로그인 후 이용 가능합니다.");
+                                        navigate("/auth/login");
+                                        return;
+                                    }
+                                    navigate("/register");
+                                }}
+                            >
+                                등록하기
+                            </button>
+
                         </div>
                     </div>
 
@@ -158,31 +136,33 @@ function Main() {
                             <div
                                 className="book-card"
                                 key={book.bookId}
-                                onClick={() =>
-                                    navigate(`/detail/${book.bookId}`)
-                                }
+                                onClick={() => openModal(book)}
+                                style={{ cursor: "pointer" }}
                             >
                                 <img
                                     className="book-image"
-                                    src={book.imageUrl}
+                                    src={
+                                        book.imageUrl
+                                            ? `http://localhost:8080${book.imageUrl}`
+                                            : "/book.webp"
+                                    }
                                     alt={book.title}
                                 />
+
                                 <div className="book-info">
-                                    <p className="book-title">
-                                        {book.title}
-                                    </p>
+                                    <p className="book-title">{book.title}</p>
                                     <div className="book-meta">
-                                        <span className="book-price">
-                                            {book.price.toLocaleString()}원
-                                        </span>
+                                        <span className="book-price">{book.price}원</span>
                                         <span className="book-date">
-                                            {book.createAt?.slice(0, 10)}
-                                        </span>
+                      {new Date(book.createAt).toLocaleDateString()}
+                    </span>
                                     </div>
                                 </div>
                             </div>
                         ))}
                     </div>
+
+                    {selectedBook && <BookDetail book={selectedBook} onClose={closeModal} />}
 
                     <div className="pagination">
                         <button
@@ -195,22 +175,15 @@ function Main() {
                         <button
                             className="page-btn"
                             disabled={currentPage === 1}
-                            onClick={() =>
-                                setCurrentPage((prev) => prev - 1)
-                            }
+                            onClick={() => setCurrentPage(prev => prev - 1)}
                         >
                             {`<`}
                         </button>
 
-                        {Array.from(
-                            { length: totalPages },
-                            (_, i) => i + 1
-                        ).map((page) => (
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                             <button
                                 key={page}
-                                className={`page-number ${
-                                    currentPage === page ? "active" : ""
-                                }`}
+                                className={`page-number ${currentPage === page ? "active" : ""}`}
                                 onClick={() => setCurrentPage(page)}
                             >
                                 {page}
@@ -220,9 +193,7 @@ function Main() {
                         <button
                             className="page-btn"
                             disabled={currentPage === totalPages}
-                            onClick={() =>
-                                setCurrentPage((prev) => prev + 1)
-                            }
+                            onClick={() => setCurrentPage(prev => prev + 1)}
                         >
                             {`>`}
                         </button>
@@ -234,7 +205,9 @@ function Main() {
                             {`>>`}
                         </button>
                     </div>
+
                 </section>
+
             </div>
         </div>
     );

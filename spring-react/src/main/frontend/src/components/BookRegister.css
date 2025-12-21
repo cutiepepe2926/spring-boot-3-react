@@ -77,3 +77,25 @@ textarea {
     font-size: 18px;
     cursor: pointer;
 }
+
+.image-box {
+    width: 200px;
+    height: 260px;
+    border: 2px dashed #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.image-label {
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+}

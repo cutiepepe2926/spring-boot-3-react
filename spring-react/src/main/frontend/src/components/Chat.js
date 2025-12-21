@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import api from "../api/api";
 import "./Chat.css";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
 function getToken() {
     return (
@@ -13,7 +15,6 @@ function getToken() {
 function getLoginIdFromToken() {
     const token = getToken();
     if (!token) return null;
-
     try {
         const payload = JSON.parse(atob(token.split(".")[1]));
         return payload.sub;
@@ -22,10 +23,31 @@ function getLoginIdFromToken() {
     }
 }
 
+function formatChatTime(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+
+    const isToday =
+        date.getFullYear() === now.getFullYear() &&
+        date.getMonth() === now.getMonth() &&
+        date.getDate() === now.getDate();
+
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+    const hh = String(date.getHours()).padStart(2, "0");
+    const min = String(date.getMinutes()).padStart(2, "0");
+
+    if (isToday) {
+        return `${hh}:${min}`;
+    }
+
+    return `${yyyy}.${mm}.${dd} ${hh}:${min}`;
+}
+
 function Chat() {
     const navigate = useNavigate();
     const location = useLocation();
-    const socketRef = useRef(null);
 
     const loginId = getLoginIdFromToken();
     const token = getToken();
@@ -35,49 +57,84 @@ function Chat() {
     const [selectedRoomId, setSelectedRoomId] = useState(null);
     const [roomMessages, setRoomMessages] = useState({});
     const [input, setInput] = useState("");
+    const [connected, setConnected] = useState(false);
+    const [userId, setUserId] = useState(null);
+
+    const stompRef = useRef(null);
+    const subscriptionRef = useRef(null);
 
     useEffect(() => {
         if (!token || !loginId) {
             alert("로그인 후 이용 가능합니다.");
             navigate("/auth/login", { replace: true });
-            return;
         }
     }, [token, loginId, navigate]);
 
-    /* 채팅방 목록 */
+    useEffect(() => {
+        if (!token) return;
+
+        api.get("/users/me")
+            .then(res => {
+                setUserId(res.data.userId);
+            })
+            .catch(err => {
+                console.error(err);
+            });
+    }, [token]);
+
+    useEffect(() => {
+        if (!userId) return;
+
+        setRooms([]);
+        setRoomMessages({});
+        setSelectedRoomId(null);
+        setConnected(false);
+
+        try {
+            subscriptionRef.current?.unsubscribe();
+            stompRef.current?.deactivate();
+        } catch {}
+
+        subscriptionRef.current = null;
+        stompRef.current = null;
+    }, [userId]);
+
     useEffect(() => {
         if (!loginId) return;
 
         const initChat = async () => {
             try {
-                const res = await api.get(`/api/chat/rooms?userId=${loginId}`);
-                let currentRooms = res.data;
+                const res = await api.get("/chat/rooms");
+                const currentRooms = res.data;
                 setRooms(currentRooms);
 
-                if (location.state && location.state.bookId) {
-                    const targetBookId = Number(location.state.bookId);
-                    const targetSellerId = Number(location.state.sellerId);
+                if (location.state?.bookId) {
+                    const { bookId, sellerId } = location.state;
+
+                    if (String(sellerId) === String(userId)) {
+                        alert("본인이 등록한 상품과는 채팅할 수 없습니다.");
+                        navigate("/chat", { replace: true, state: {} });
+                        return;
+                    }
 
                     const existingRoom = currentRooms.find(
-                        (r) => Number(r.bookId) === targetBookId &&
-                            (Number(r.sellerId) === targetSellerId || Number(r.buyerId) === targetSellerId)
+                        (r) =>
+                            Number(r.bookId) === Number(bookId) &&
+                            Number(r.sellerId) === Number(sellerId)
                     );
 
                     if (existingRoom) {
                         setSelectedRoomId(existingRoom.roomId);
                     } else {
-                        const createRes = await api.post("/api/chat/rooms", {
-                            bookId: targetBookId,
-                            sellerId: targetSellerId,
-                            buyerId: Number(loginId),
+                        const createRes = await api.post("/chat/rooms", {
+                            bookId,
+                            sellerId,
                         });
-
-                        if (createRes.data) {
-                            const newRoom = createRes.data;
-                            setRooms((prev) => [newRoom, ...prev]);
-                            setSelectedRoomId(newRoom.roomId);
-                        }
+                        const newRoom = createRes.data;
+                        setRooms((prev) => [newRoom, ...prev]);
+                        setSelectedRoomId(newRoom.roomId);
                     }
+
                     navigate(location.pathname, { replace: true, state: {} });
                 }
             } catch (err) {
@@ -86,93 +143,146 @@ function Chat() {
         };
 
         initChat();
-    }, [loginId, location.state, navigate]);
+    }, [loginId, location.state, navigate, userId]);
 
-    const selectedRoom = useMemo(() => {
-        return rooms.find((r) => r.roomId === selectedRoomId);
-    }, [rooms, selectedRoomId]);
+    const selectedRoom = useMemo(
+        () => rooms.find((r) => r.roomId === selectedRoomId),
+        [rooms, selectedRoomId]
+    );
 
     const filteredRooms = useMemo(() => {
-        if (filter === "전체") return rooms;
-        return rooms.filter((r) => {
-            if (filter === "판매") return String(r.sellerId) === String(loginId);
-            if (filter === "구매") return String(r.buyerId) === String(loginId);
-            return true;
-        });
-    }, [filter, rooms, loginId]);
+        const roomsWithMessage = rooms.filter(
+            (r) => r.lastMessage !== null
+        );
 
-    /* 메시지 조회 */
+        if (filter === "전체") return roomsWithMessage;
+
+        return roomsWithMessage.filter((r) =>
+            filter === "판매"
+                ? Number(r.sellerId) === Number(userId)
+                : Number(r.buyerId) === Number(userId)
+        );
+    }, [filter, rooms, userId]);
+
     useEffect(() => {
         if (!selectedRoomId) return;
 
         const fetchMessages = async () => {
             try {
-                const res = await api.get(`/api/chat/rooms/${selectedRoomId}/messages`);
+                const res = await api.get(
+                    `/chat/rooms/${selectedRoomId}/messages`
+                );
                 setRoomMessages((prev) => ({
                     ...prev,
                     [selectedRoomId]: res.data,
                 }));
-            } catch (err) {
-                console.error(err);
+            } catch (e) {
+                console.error(e);
+                setRoomMessages((prev) => ({
+                    ...prev,
+                    [selectedRoomId]: [],
+                }));
+                alert("해당 채팅방에 접근 권한이 없습니다.");
             }
         };
 
         fetchMessages();
     }, [selectedRoomId]);
 
-    /* 메시지 전송 */
-    const handleSend = async () => {
-        if (!input.trim() || !selectedRoomId) return;
+    useEffect(() => {
+        if (!token || stompRef.current) return;
 
-        try {
-            const messageData = {
-                senderId: loginId,
-                content: input,
-            };
+        const client = new Client({
+            webSocketFactory: () => new SockJS("/api/ws"),
+            connectHeaders: {
+                Authorization: `Bearer ${token}`,
+            },
+            reconnectDelay: 3000,
+            debug: () => {},
+        });
 
-            await api.post(`/api/chat/rooms/${selectedRoomId}/messages`, messageData);
+        client.onConnect = () => {
+            stompRef.current = client;
+            setConnected(true);
+        };
 
-            setInput("");
+        client.activate();
+    }, [token]);
 
-            const res = await api.get(`/api/chat/rooms/${selectedRoomId}/messages`);
-            setRoomMessages((prev) => ({
-                ...prev,
-                [selectedRoomId]: res.data,
-            }));
-        } catch (err) {
-            console.error(err);
+    useEffect(() => {
+        if (!connected || !stompRef.current || !selectedRoomId) return;
+
+        if (subscriptionRef.current) {
+            subscriptionRef.current.unsubscribe();
         }
+
+        subscriptionRef.current = stompRef.current.subscribe(
+            `/topic/chat/rooms/${selectedRoomId}`,
+            (message) => {
+                const payload = JSON.parse(message.body);
+                setRoomMessages((prev) => {
+                    const prevList = prev[selectedRoomId] ?? [];
+                    return {
+                        ...prev,
+                        [selectedRoomId]: [...prevList, payload],
+                    };
+                });
+            }
+        );
+
+        return () => {
+            subscriptionRef.current?.unsubscribe();
+            subscriptionRef.current = null;
+        };
+    }, [connected, selectedRoomId]);
+
+    useEffect(() => {
+        return () => {
+            try {
+                subscriptionRef.current?.unsubscribe();
+                stompRef.current?.deactivate();
+            } catch {}
+            subscriptionRef.current = null;
+            stompRef.current = null;
+        };
+    }, []);
+
+    const handleSend = () => {
+        if (!input.trim() || !selectedRoomId || !stompRef.current) return;
+
+        const message = {
+            content: input,
+        };
+
+        stompRef.current.publish({
+            destination: `/app/chat/rooms/${selectedRoomId}/messages`,
+            body: JSON.stringify(message),
+        });
+
+        setInput("");
     };
 
     const messages = roomMessages[selectedRoomId] ?? [];
+
+    const getOpponentId = (room) =>
+        Number(room.sellerId) === Number(userId)
+            ? room.buyerLoginId
+            : room.sellerLoginId;
 
     return (
         <div className="page">
             <div className="container">
                 <div className="chat-layout">
-                    {/* 왼쪽 */}
                     <aside className="chat-list">
                         <div className="chat-list-header">
-                            <button
-                                className="back-btn"
-                                onClick={() => navigate(-1)}
-                            >
-                                〈
-                            </button>
-                            <h2>대화방</h2>
-
-                            <div className="chat-filters">
-                                {["전체", "판매", "구매"].map((t) => (
-                                    <button
-                                        key={t}
-                                        className={`filter-btn ${
-                                            filter === t ? "active" : ""
-                                        }`}
-                                        onClick={() => setFilter(t)}
-                                    >
-                                        {t}
-                                    </button>
-                                ))}
+                            <div className="chat-header-top">
+                                <button
+                                    className="back-btn"
+                                    onClick={() => navigate(-1)}
+                                >
+                                    〈
+                                </button>
+                                <h2>대화방</h2>
                             </div>
                         </div>
 
@@ -187,33 +297,30 @@ function Chat() {
                                 <div
                                     key={room.roomId}
                                     className={`chat-room ${
-                                        selectedRoomId === room.roomId
-                                            ? "active"
-                                            : ""
+                                        selectedRoomId === room.roomId ? "active" : ""
                                     }`}
-                                    onClick={() =>
-                                        setSelectedRoomId(room.roomId)
-                                    }
+                                    onClick={() => setSelectedRoomId(room.roomId)}
                                 >
                                     <div className="profile-circle" />
-
                                     <div className="chat-room-info">
                                         <p className="nickname">
-                                            {room.otherUserName}
+                                            {getOpponentId(room)}
                                         </p>
                                         <p className="last-message">
-                                            {room.lastMessage || "대화를 시작해 보세요."}
+                                            {room.lastMessage}
                                         </p>
                                     </div>
-
                                     <div className="chat-room-meta">
-                                        <span className="time">
-                                            {room.lastTime}
-                                        </span>
+                                        <span className="time">{room.lastTime}</span>
                                         <div className="product-thumb">
-                                            상품
-                                            <br />
-                                            사진
+                                            <img
+                                                src={
+                                                    room.imageUrl
+                                                        ? `http://localhost:8080${room.imageUrl}`
+                                                        : "/book.webp"
+                                                }
+                                                alt={room.bookTitle}
+                                            />
                                         </div>
                                     </div>
                                 </div>
@@ -221,41 +328,42 @@ function Chat() {
                         </div>
                     </aside>
 
-                    {/* 오른쪽 */}
                     <section className="chat-room-detail">
                         {!selectedRoom && (
                             <div className="chat-empty">
                                 <h3>채팅을 시작해 보세요</h3>
-                                <p>
-                                    거래를 시작하면 채팅방이 생성됩니다.
-                                </p>
+                                <p>거래를 시작하면 채팅방이 생성됩니다.</p>
                             </div>
                         )}
 
                         {selectedRoom && (
                             <>
-                                <header className="chat-header">
+                                <div className="chat-header">
                                     <span className="chat-title">
-                                        {selectedRoom.otherUserName}
+                                        {getOpponentId(selectedRoom)}
                                     </span>
-                                </header>
+                                </div>
 
                                 <div className="chat-product">
                                     <div className="product-image">
-                                        상품
-                                        <br />
-                                        사진
+                                        <img
+                                            src={
+                                                selectedRoom.imageUrl
+                                                    ? `http://localhost:8080${selectedRoom.imageUrl}`
+                                                    : "/book.webp"
+                                            }
+                                            alt={selectedRoom.bookTitle}
+                                        />
                                     </div>
-
                                     <div className="product-info">
                                         <span className="product-status">
                                             {selectedRoom.productStatus}
                                         </span>
                                         <span className="product-name">
-                                            {selectedRoom.productName}
+                                            {selectedRoom.bookTitle}
                                         </span>
                                         <p className="product-price">
-                                            {selectedRoom.productPrice?.toLocaleString()}원
+                                            {selectedRoom.price}원
                                         </p>
                                     </div>
                                 </div>
@@ -271,14 +379,14 @@ function Chat() {
                                         <div
                                             key={msg.messageId || idx}
                                             className={`message ${
-                                                String(msg.senderId) === String(loginId)
+                                                msg.senderId === userId
                                                     ? "me"
                                                     : "other"
                                             }`}
                                         >
                                             <p>{msg.content}</p>
                                             <span className="msg-time">
-                                                {msg.sentAt}
+                                                {formatChatTime(msg.sentAt)}
                                             </span>
                                         </div>
                                     ))}
@@ -287,9 +395,7 @@ function Chat() {
                                 <div className="chat-input">
                                     <input
                                         value={input}
-                                        onChange={(e) =>
-                                            setInput(e.target.value)
-                                        }
+                                        onChange={(e) => setInput(e.target.value)}
                                         onKeyDown={(e) =>
                                             e.key === "Enter" && handleSend()
                                         }
