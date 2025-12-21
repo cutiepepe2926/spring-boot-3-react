@@ -1,3 +1,4 @@
+Chat.js
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import api from "../api/api";
@@ -413,3 +414,5 @@ function Chat() {
 }
 
 export default Chat;
+
+

@@ -73,4 +73,3 @@ public class ChatServiceImpl implements ChatService {
         chatMapper.insertChatMessage(vo);
     }
 }
-
