@@ -11,6 +11,7 @@
 
         SELECT
             b.book_id    AS bookId,
+            b.seller_id  AS sellerId,
             b.title      AS title,
             b.price      AS price,
             b.create_at  AS createAt,

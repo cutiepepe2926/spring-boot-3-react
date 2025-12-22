@@ -1,10 +1,10 @@
-//Chat.js
+import "./Chat.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import api from "../api/api";
-import "./Chat.css";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+
 
 function getToken() {
     return (
@@ -247,27 +247,62 @@ function Chat() {
             !input.trim() ||
             !selectedRoomId ||
             !stompRef.current ||
-            !stompRef.current.connected
+            !connected
         ) {
             return;
         }
 
+        const message = {
+            content: input,
+        };
+
         stompRef.current.publish({
             destination: `/app/chat/rooms/${selectedRoomId}/messages`,
-            body: JSON.stringify({ content: input }),
+            body: JSON.stringify(message),
         });
 
         setInput("");
     };
 
+    const handleProductAction = async () => {
+        if (!window.confirm("거래를 종료하시겠습니까?")) return;
+
+        try {
+            await api.post(`/chat/rooms/${selectedRoomId}/close`);
+
+            alert("거래가 종료되었습니다.");
+
+            setRooms(prev =>
+                prev.filter(r => r.bookId !== selectedRoom.bookId)
+            );
+
+            setSelectedRoomId(null);
+        } catch (e) {
+            alert("거래 종료 실패");
+        }
+    };
+
+    const isSeller = useMemo(() => {
+        if (!selectedRoom || !loginId) return false;
+        return selectedRoom.sellerLoginId === loginId;
+    }, [selectedRoom, loginId]);
+
     const messages = roomMessages[selectedRoomId] ?? [];
 
-    const getOpponentId = (room) =>
-        Number(room.sellerId) === Number(userId)
+    const getOpponentId = (room) => {
+        if (!room || !loginId) return "";
+
+        return room.sellerLoginId === loginId
             ? room.buyerLoginId
             : room.sellerLoginId;
+    };
 
-
+    console.log({
+        loginId,
+        sellerLoginId: selectedRoom?.sellerLoginId,
+        userId,
+        sellerId: selectedRoom?.sellerId,
+    });
 
     return (
         <div className="page">
@@ -332,7 +367,7 @@ function Chat() {
                         {!selectedRoom && (
                             <div className="chat-empty">
                                 <h3>채팅을 시작해 보세요</h3>
-                                <p>거래를 시작하면 채팅방이 생성됩니다.</p>
+                                <p>채팅방을 누르거나 거래를 시작하면 채팅방이 생성됩니다.</p>
                             </div>
                         )}
 
@@ -365,6 +400,13 @@ function Chat() {
                                         <p className="product-price">
                                             {selectedRoom.price}원
                                         </p>
+                                        {isSeller && (
+                                            <div className="product-actions">
+                                                <button onClick={() => handleProductAction("거래 종료")}>
+                                                    거래종료
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
@@ -411,5 +453,3 @@ function Chat() {
 }
 
 export default Chat;
-
-

@@ -37,6 +37,9 @@ function BookDetail({ book, onClose }) {
                             <button
                                 className="btn btn-talk"
                                 onClick={() => {
+                                    console.log("BookDetail book:", book);
+                                    console.log("sellerId:", book.sellerId);
+
                                     navigate("/chat", {
                                         state: {
                                             bookId: book.bookId,

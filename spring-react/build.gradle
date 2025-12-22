@@ -48,6 +48,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security:3.5.8'
 	implementation 'com.auth0:java-jwt:4.4.0' // JWT TOKEN
     implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
 }
 
 tasks.named('test') {

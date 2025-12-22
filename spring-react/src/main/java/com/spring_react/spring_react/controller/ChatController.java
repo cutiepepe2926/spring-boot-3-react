@@ -21,17 +21,15 @@ public class ChatController {
     // 채팅방 목록
     @GetMapping("/rooms")
     public List<ChatRoomVO> getRooms(Authentication authentication) {
-        String loginId = (String) authentication.getPrincipal();
+        String loginId = authentication.getName();
         return chatService.getChatRooms(loginId);
     }
 
     // 채팅방 생성 or 조회
     @PostMapping("/rooms")
-    public ChatRoomVO createRoom(
-            Authentication authentication,
-            @RequestBody ChatRoomVO vo
-    ) {
-        String loginId = (String) authentication.getPrincipal();
+    public ChatRoomVO createRoom(Authentication authentication,
+                                 @RequestBody ChatRoomVO vo) {
+        String loginId = authentication.getName();
         return chatService.getOrCreateRoom(loginId, vo);
     }
 
@@ -41,7 +39,7 @@ public class ChatController {
             @PathVariable int roomId,
             Authentication authentication
     ) {
-        String loginId = (String) authentication.getPrincipal();
+        String loginId = authentication.getName();
         return chatService.getMessages(roomId, loginId);
     }
 
@@ -52,18 +50,18 @@ public class ChatController {
             @RequestBody ChatMessageVO vo,
             Authentication authentication
     ) {
-        String loginId = (String) authentication.getPrincipal();
-
+        String loginId = authentication.getName();
         vo.setRoomId(roomId);
         chatService.sendMessage(vo, loginId);
     }
 
+    // 거래 종료
     @PostMapping("/rooms/{roomId}/close")
     public void closeDeal(
             @PathVariable int roomId,
             Authentication authentication
     ) {
-        String loginId = (String) authentication.getPrincipal();
+        String loginId = authentication.getName();
         chatService.closeDeal(roomId, loginId);
     }
 }
