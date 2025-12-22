@@ -10,12 +10,15 @@
             resultType="com.spring_react.spring_react.command.MainBookVO">
 
         SELECT
-            b.book_id    AS bookId,
-            b.seller_id  AS sellerId,
-            b.title      AS title,
-            b.price      AS price,
-            b.create_at  AS createAt,
-            bi.image_url AS imageUrl
+            b.book_id      AS bookId,
+            b.seller_id    AS sellerId,
+            b.title        AS title,
+            b.author       AS author,
+            b.publisher    AS publisher,
+            b.description  AS description,
+            b.price        AS price,
+            b.create_at    AS createAt,
+            bi.image_url   AS imageUrl
         FROM book b
                  LEFT JOIN book_image bi
                            ON b.book_id = bi.book_id

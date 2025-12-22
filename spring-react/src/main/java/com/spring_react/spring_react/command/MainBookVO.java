@@ -14,6 +14,9 @@ public class MainBookVO {
     private int bookId;              // 도서 ID
     private Integer sellerId;
     private String title;            // 책 제목
+    private String author;
+    private String publisher;
+    private String description;
     private int price;               // 가격
     private String imageUrl;         // 대표 이미지 URL
     private LocalDateTime createAt;  // 등록일
