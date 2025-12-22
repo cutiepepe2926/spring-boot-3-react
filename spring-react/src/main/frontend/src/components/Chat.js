@@ -215,6 +215,19 @@ function Chat() {
             `/topic/chat/rooms/${selectedRoomId}`,
             (message) => {
                 const payload = JSON.parse(message.body);
+
+                console.log("STOMP 수신:", payload);
+
+                if (payload.type === "CLOSE") {
+                    window.alert("거래가 종료된 방입니다.");
+
+                    setTimeout(() => {
+                        setSelectedRoomId(null);
+                    }, 0);
+
+                    return;
+                }
+
                 setRoomMessages((prev) => {
                     const prevList = prev[selectedRoomId] ?? [];
                     return {

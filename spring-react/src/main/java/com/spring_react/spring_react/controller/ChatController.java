@@ -3,9 +3,11 @@ package com.spring_react.spring_react.controller;
 import com.spring_react.spring_react.chat.ChatService;
 import com.spring_react.spring_react.command.ChatMessageVO;
 import com.spring_react.spring_react.command.ChatRoomVO;
+import com.spring_react.spring_react.command.CloseEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -19,6 +21,7 @@ import java.util.List;
 public class ChatController {
 
     private final ChatService chatService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     // 채팅방 목록
     @GetMapping("/rooms")
@@ -72,6 +75,12 @@ public class ChatController {
             Authentication authentication
     ) {
         String loginId = authentication.getName();
+
         chatService.closeDeal(roomId, loginId);
+
+        messagingTemplate.convertAndSend(
+                "/topic/chat/rooms/" + roomId,
+                CloseEvent.of()
+        );
     }
 }
