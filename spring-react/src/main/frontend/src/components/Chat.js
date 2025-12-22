@@ -243,15 +243,18 @@ function Chat() {
     }, []);
 
     const handleSend = () => {
-        if (!input.trim() || !selectedRoomId || !stompRef.current) return;
-
-        const message = {
-            content: input,
-        };
+        if (
+            !input.trim() ||
+            !selectedRoomId ||
+            !stompRef.current ||
+            !stompRef.current.connected
+        ) {
+            return;
+        }
 
         stompRef.current.publish({
             destination: `/app/chat/rooms/${selectedRoomId}/messages`,
-            body: JSON.stringify(message),
+            body: JSON.stringify({ content: input }),
         });
 
         setInput("");

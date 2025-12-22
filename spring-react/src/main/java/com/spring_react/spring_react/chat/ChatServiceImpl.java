@@ -67,6 +67,10 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public void sendMessage(ChatMessageVO vo, String loginId) {
+        System.out.println("🔥 ChatService.sendMessage 호출");
+        System.out.println("roomId=" + vo.getRoomId());
+        System.out.println("senderLoginId=" + loginId);
+        System.out.println("content=" + vo.getContent());
         int senderId = userMapper.findUserIdByLoginId(loginId);
 
         vo.setSenderId(senderId);
