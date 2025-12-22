@@ -32,6 +32,10 @@ public class ChatServiceImpl implements ChatService {
         int buyerId = userMapper.findUserIdByLoginId(loginId);
         int sellerId = chatMapper.findSellerIdByBookId(vo.getBookId());
 
+        if (buyerId == sellerId) {
+            throw new IllegalStateException("본인 상품은 구매할 수 없습니다.");
+        }
+
         vo.setBuyerId(buyerId);
         vo.setSellerId(sellerId);
 

@@ -5,8 +5,10 @@ import com.spring_react.spring_react.command.ChatMessageVO;
 import com.spring_react.spring_react.command.ChatRoomVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,7 +32,15 @@ public class ChatController {
     public ChatRoomVO createRoom(Authentication authentication,
                                  @RequestBody ChatRoomVO vo) {
         String loginId = authentication.getName();
-        return chatService.getOrCreateRoom(loginId, vo);
+
+        try {
+            return chatService.getOrCreateRoom(loginId, vo);
+        } catch (IllegalStateException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    e.getMessage()
+            );
+        }
     }
 
     // 메시지 목록
