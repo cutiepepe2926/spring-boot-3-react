@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 public class MainBookVO {
 
     private int bookId;              // 도서 ID
+    private Integer sellerId;
     private String title;            // 책 제목
     private int price;               // 가격
     private String imageUrl;         // 대표 이미지 URL

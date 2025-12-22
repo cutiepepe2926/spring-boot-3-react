@@ -2,15 +2,15 @@ package com.spring_react.spring_react.controller;
 
 import com.spring_react.spring_react.bookregister.BookImageMapper;
 import com.spring_react.spring_react.bookregister.BookRegisterService;
+import com.spring_react.spring_react.chat.UserMapper;
 import com.spring_react.spring_react.command.BookRegisterVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.nio.file.attribute.UserPrincipal;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,7 +21,7 @@ public class BookRegisterController {
 
     private final BookRegisterService service;
     private final BookImageMapper bookImageMapper;
-
+    private final UserMapper userMapper;
 
     // 🔥 책 등록
     @PostMapping("/books")
@@ -31,8 +31,13 @@ public class BookRegisterController {
             @RequestParam String publisher,
             @RequestParam Integer price,
             @RequestParam String description,
-            @RequestParam MultipartFile image
+            @RequestParam MultipartFile image,
+            Authentication authentication
     ) throws Exception {
+
+        // ✅ 로그인 사용자 정보
+        String loginId = (String) authentication.getPrincipal();
+        int sellerId = userMapper.findUserIdByLoginId(loginId);
 
         // 1️⃣ 파일 저장
         String uploadDir = "C:/upload/books/";
@@ -50,8 +55,10 @@ public class BookRegisterController {
         book.setPublisher(publisher);
         book.setPrice(price);
         book.setDescription(description);
-        book.setSellerId(1);
-        book.setSellerName("어드민");
+
+        // 🔥 핵심 수정 부분
+        book.setSellerId(sellerId);
+        book.setSellerName(loginId);
 
         service.registerBook(book);
 
@@ -65,10 +72,9 @@ public class BookRegisterController {
         return ResponseEntity.ok().build();
     }
 
-
-
     // 🔥 책 목록 조회
     @GetMapping("/books")
     public List<BookRegisterVO> list() {
         return service.getBookList();
-    }};
+    }
+}

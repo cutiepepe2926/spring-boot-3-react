@@ -51,8 +51,8 @@
             JOIN book b ON cr.book_id = b.book_id
             JOIN users su ON cr.seller_id = su.user_id
             JOIN users bu ON cr.buyer_id  = bu.user_id
-        WHERE cr.seller_id = #{userId}
-           OR cr.buyer_id  = #{userId}
+        WHERE (cr.seller_id = #{userId} OR cr.buyer_id = #{userId})
+          AND cr.is_closed = FALSE
         ORDER BY cr.created_at DESC
     </select>
 
@@ -95,14 +95,16 @@
             resultType="com.spring_react.spring_react.command.ChatMessageVO">
 
         SELECT
-            message_id AS messageId,
-            room_id    AS roomId,
-            sender_id  AS senderId,
-            content,
-            sent_at    AS sentAt
-        FROM chat_message
-        WHERE room_id = #{roomId}
-        ORDER BY sent_at ASC
+            cm.message_id AS messageId,
+            cm.room_id    AS roomId,
+            cm.sender_id  AS senderId,
+            u.login_id    AS senderLoginId,
+            cm.content,
+            cm.sent_at    AS sentAt
+        FROM chat_message cm
+                 JOIN users u ON cm.sender_id = u.user_id
+        WHERE cm.room_id = #{roomId}
+        ORDER BY cm.sent_at ASC
     </select>
 
     <insert id="insertChatMessage"
@@ -154,5 +156,22 @@
         WHERE cr.room_id = #{roomId}
     </select>
 
+    <select id="findSellerIdByBookId" parameterType="int" resultType="int">
+        SELECT seller_id
+        FROM book
+        WHERE book_id = #{bookId}
+    </select>
+
+    <update id="closeChatRoomsByBookId">
+        UPDATE chat_room
+        SET is_closed = TRUE
+        WHERE book_id = #{bookId}
+    </update>
+
+    <update id="updateBookStatus">
+        UPDATE book
+        SET status = #{status}
+        WHERE book_id = #{bookId}
+    </update>
 
 </mapper>

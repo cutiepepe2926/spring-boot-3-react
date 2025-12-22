@@ -33,6 +33,7 @@ public class SocketHandler {
 
         message.setRoomId(roomId);
         message.setSenderId(senderId);
+        message.setSenderLoginId(loginId);
         message.setSentAt(LocalDateTime.now());
 
 

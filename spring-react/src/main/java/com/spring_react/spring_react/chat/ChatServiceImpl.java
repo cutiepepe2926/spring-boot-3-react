@@ -32,17 +32,19 @@ public class ChatServiceImpl implements ChatService {
         int buyerId = userMapper.findUserIdByLoginId(loginId);
         vo.setBuyerId(buyerId);
 
+        int sellerId = chatMapper.findSellerIdByBookId(vo.getBookId());
+        vo.setSellerId(sellerId);
+
+        if (buyerId == sellerId) {
+            throw new IllegalStateException("본인 상품과는 채팅할 수 없습니다.");
+        }
+
         ChatRoomVO room = chatMapper.selectChatRoom(vo);
         if (room != null) {
             return room;
         }
 
-        try {
-            chatMapper.insertChatRoom(vo);
-        } catch (org.springframework.dao.DuplicateKeyException e) {
-            return chatMapper.selectChatRoom(vo);
-        }
-
+        chatMapper.insertChatRoom(vo);
         return chatMapper.getChatRoomDetail(vo.getRoomId());
     }
 
@@ -68,8 +70,29 @@ public class ChatServiceImpl implements ChatService {
         int senderId = userMapper.findUserIdByLoginId(loginId);
 
         vo.setSenderId(senderId);
+        vo.setSenderLoginId(loginId);
         vo.setSentAt(LocalDateTime.now());
 
         chatMapper.insertChatMessage(vo);
+    }
+
+    @Override
+    @Transactional
+    public void closeDeal(int roomId, String loginId) {
+
+        int userId = userMapper.findUserIdByLoginId(loginId);
+        ChatRoomVO room = chatMapper.getChatRoomDetail(roomId);
+
+        if (room == null) {
+            throw new IllegalArgumentException("채팅방이 존재하지 않습니다.");
+        }
+
+        if (room.getSellerId() != userId) {
+            throw new AccessDeniedException("판매자만 거래 종료할 수 있습니다.");
+        }
+
+        chatMapper.updateBookStatus(room.getBookId(), "판매완료");
+
+        chatMapper.closeChatRoomsByBookId(room.getBookId());
     }
 }

@@ -28,7 +28,7 @@ function Main() {
     }, []);
 
     useEffect(() => {
-        api.get("/books")
+        api.get("/books/main")
             .then(res => {
                 setBooks(res.data);
             })

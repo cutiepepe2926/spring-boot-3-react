@@ -18,10 +18,21 @@
 
     <select id="findAllBooks"
             resultType="com.spring_react.spring_react.command.BookRegisterVO">
-        SELECT *
+        SELECT
+            book_id   AS bookId,
+            seller_id AS sellerId,
+            title,
+            seller_name AS sellerName,
+            author,
+            publisher,
+            price,
+            description,
+            status,
+            create_at AS createAt
         FROM book
         ORDER BY create_at DESC
     </select>
+
 
 
 

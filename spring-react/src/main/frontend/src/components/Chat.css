@@ -1,4 +1,3 @@
-Chat.css
 .page {
     width: 100%;
     height: 100vh;
@@ -137,6 +136,7 @@ Chat.css
     align-items: center;
     justify-content: center;
     margin-top: 4px;
+    margin-left: 50px;
 }
 
 .chat-room-detail {
@@ -297,9 +297,17 @@ Chat.css
     cursor: pointer;
 }
 
+.product-actions {
+    margin-top: 8px;
+    display: flex;
+    gap: 8px;
+}
 
-.message.other {
-    align-self: flex-start;
-    background-color: #e5e7eb;
-    color: black;
+.product-actions button {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    background: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
 }

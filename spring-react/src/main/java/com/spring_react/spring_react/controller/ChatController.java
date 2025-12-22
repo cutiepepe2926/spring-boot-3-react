@@ -57,4 +57,13 @@ public class ChatController {
         vo.setRoomId(roomId);
         chatService.sendMessage(vo, loginId);
     }
+
+    @PostMapping("/rooms/{roomId}/close")
+    public void closeDeal(
+            @PathVariable int roomId,
+            Authentication authentication
+    ) {
+        String loginId = (String) authentication.getPrincipal();
+        chatService.closeDeal(roomId, loginId);
+    }
 }

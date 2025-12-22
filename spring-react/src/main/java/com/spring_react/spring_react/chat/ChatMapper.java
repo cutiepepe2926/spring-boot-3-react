@@ -25,4 +25,12 @@ public interface ChatMapper {
     void insertChatMessage(ChatMessageVO vo);
 
     ChatRoomVO getChatRoomDetail(int roomId);
+
+    int findSellerIdByBookId(int bookId);
+
+    // 거래 종료: 해당 book의 모든 채팅방 닫기
+    void closeChatRoomsByBookId(int bookId);
+
+    // 거래 종료: 상품 상태 변경
+    void updateBookStatus(int bookId, String status);
 }

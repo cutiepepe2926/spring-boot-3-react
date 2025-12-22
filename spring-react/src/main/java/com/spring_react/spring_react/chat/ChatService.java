@@ -14,4 +14,7 @@ public interface ChatService {
     List<ChatMessageVO> getMessages(int roomId, String loginId);
 
     void sendMessage(ChatMessageVO vo, String loginId);
+
+    void closeDeal(int roomId, String loginId);
+
 }
