@@ -36,6 +36,9 @@ CREATE TABLE book (
         FOREIGN KEY (seller_id) REFERENCES users(user_id)
 );
 
+ALTER TABLE book ADD COLUMN author VARCHAR(255);
+ALTER TABLE book ADD COLUMN publisher VARCHAR(255);
+
 CREATE TABLE book_image (
     image_id     VARCHAR(255) NOT NULL COMMENT '이미지 ID(고유값)',
     book_id      INT NOT NULL COMMENT '어떤 도서의 이미지인지 나타냄',
@@ -70,6 +73,9 @@ CREATE TABLE chat_room (
         FOREIGN KEY (buyer_id)  REFERENCES users(user_id)
 );
 
+ALTER TABLE chat_room
+ADD COLUMN is_closed BOOLEAN DEFAULT FALSE;
+
 CREATE TABLE chat_message (
     message_id INT NOT NULL AUTO_INCREMENT COMMENT '메시지 고유 ID',
     room_id    INT NOT NULL COMMENT '채팅방 ID',
@@ -103,5 +109,3 @@ CREATE TABLE chat_list (
     CONSTRAINT fk_chat_list_room
         FOREIGN KEY (room_id) REFERENCES chat_room(room_id)
 );
-
-
