@@ -221,7 +221,6 @@ function Chat() {
                     setSelectedRoomId(null);
                     return;
                 }
-
                 setRoomMessages((prev) => {
                     const prevList = prev[selectedRoomId] ?? [];
                     return {
@@ -229,7 +228,6 @@ function Chat() {
                         [selectedRoomId]: [...prevList, payload],
                     };
                 });
-
                 setRooms((prevRooms) =>
                     prevRooms.map((room) =>
                         room.roomId === selectedRoomId

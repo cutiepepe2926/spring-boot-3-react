@@ -93,5 +93,4 @@ public class ChatServiceImpl implements ChatService {
         // 해당 상품의 모든 채팅방 종료
         chatMapper.closeChatRoomsByBookId(room.getBookId());
     }
-
 }
