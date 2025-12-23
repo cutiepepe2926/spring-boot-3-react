@@ -4,6 +4,7 @@ import com.spring_react.spring_react.security.JwtAuthFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -39,8 +40,10 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // 일단 로그인/회원가입은 열어두기 (경로는 API 엔드포인트가 추가될 경우 추가하기)
+                        .requestMatchers(HttpMethod.GET, "/images/**", "/uploads/**").permitAll()
                         .requestMatchers( "/api/auth/v1/**").permitAll()
                         .requestMatchers("/api/books/main").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/books/image/**").permitAll()
                         // 개발 초반엔 디버깅용 전부 허용 (JWT 붙이기 전까지만)
                         //.anyRequest().permitAll()
                         .requestMatchers(
@@ -49,8 +52,8 @@ public class SecurityConfig {
                                 "/*.css", "/*.js", "/*.png", "/*.jpg", "/*.jpeg", "/*.svg", "/*.ico",
                                 "/assets/**"
                         ).permitAll()
-                                .anyRequest().permitAll()
-                        //.anyRequest().authenticated()
+                                //.anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthFilter(jwtSecret, jwtIssuer), UsernamePasswordAuthenticationFilter.class);
 
