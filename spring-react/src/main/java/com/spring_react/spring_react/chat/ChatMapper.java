@@ -3,6 +3,7 @@ package com.spring_react.spring_react.chat;
 import com.spring_react.spring_react.command.ChatMessageVO;
 import com.spring_react.spring_react.command.ChatRoomVO;
 import org.apache.ibatis.annotations.Mapper;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -10,7 +11,7 @@ import java.util.List;
 public interface ChatMapper {
 
     // 채팅방 목록
-    List<ChatRoomVO> getChatRooms(int userId);
+    List<ChatRoomVO> getChatRooms(@Param("userId") int userId);
 
     // 채팅방 단건 조회
     ChatRoomVO selectChatRoom(ChatRoomVO vo);

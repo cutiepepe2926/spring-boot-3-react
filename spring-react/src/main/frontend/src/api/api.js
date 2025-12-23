@@ -31,7 +31,8 @@ api.interceptors.response.use(
 
         if (
             (status === 401 || status === 403) &&
-            !requestUrl?.includes("/books/main")
+            !requestUrl?.includes("/books/main") &&
+            !requestUrl?.includes("/me")
         ) {
             localStorage.removeItem("accessToken");
             sessionStorage.removeItem("accessToken");

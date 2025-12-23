@@ -23,4 +23,3 @@ public class ChatRoomVO {
 
     private String imageUrl;
 }
-

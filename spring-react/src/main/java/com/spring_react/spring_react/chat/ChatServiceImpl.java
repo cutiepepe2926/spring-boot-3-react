@@ -30,14 +30,14 @@ public class ChatServiceImpl implements ChatService {
     public ChatRoomVO getOrCreateRoom(String loginId, ChatRoomVO vo) {
 
         int buyerId = userMapper.findUserIdByLoginId(loginId);
-        vo.setBuyerId(buyerId);
-
         int sellerId = chatMapper.findSellerIdByBookId(vo.getBookId());
-        vo.setSellerId(sellerId);
 
         if (buyerId == sellerId) {
-            throw new IllegalStateException("본인 상품과는 채팅할 수 없습니다.");
+            throw new IllegalStateException("본인 상품은 구매할 수 없습니다.");
         }
+
+        vo.setBuyerId(buyerId);
+        vo.setSellerId(sellerId);
 
         ChatRoomVO room = chatMapper.selectChatRoom(vo);
         if (room != null) {
@@ -67,10 +67,6 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public void sendMessage(ChatMessageVO vo, String loginId) {
-        System.out.println("🔥 ChatService.sendMessage 호출");
-        System.out.println("roomId=" + vo.getRoomId());
-        System.out.println("senderLoginId=" + loginId);
-        System.out.println("content=" + vo.getContent());
         int senderId = userMapper.findUserIdByLoginId(loginId);
 
         vo.setSenderId(senderId);
@@ -91,12 +87,11 @@ public class ChatServiceImpl implements ChatService {
             throw new IllegalArgumentException("채팅방이 존재하지 않습니다.");
         }
 
-        if (room.getSellerId() != userId) {
-            throw new AccessDeniedException("판매자만 거래 종료할 수 있습니다.");
-        }
-
+        // 상품 상태 → 판매완료
         chatMapper.updateBookStatus(room.getBookId(), "판매완료");
 
+        // 해당 상품의 모든 채팅방 종료
         chatMapper.closeChatRoomsByBookId(room.getBookId());
     }
+
 }
