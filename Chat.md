@@ -1,4 +1,5 @@
 1) Architecture (REST + WebSocket/STOMP + MyBatis)
+```text
 +------------------------------+                     +-----------------------------------------------+
 |           React SPA           |                     |                 Spring Boot                    |
 |------------------------------|                     |-----------------------------------------------|
@@ -19,8 +20,9 @@
                                                                       | book / user ...  |
                                                                       +------------------+
 
-
-2) Flow A — WS CONNECT + Auth (Principal)
+```
+3) Flow A — WS CONNECT + Auth (Principal)
+```text
 | Client |     /api/ws(SockJS)      | StompAuthInterceptor |  JwtProvider  |
 |--------|---------------------------|---------------------|--------------|
 | CONNECT (Authorization: Bearer JWT) ------------------------------->     |
@@ -28,9 +30,10 @@
 |        |                                           | getAuthentication(token) ---> |
 |        |                                           | <--- Authentication           |
 |        | setUser(Principal=Authentication) <--------|                |
-
+```
 
 3) Flow B — Realtime Message (persist + broadcast)
+```text
 | Client |  SocketHandler  |  ChatService  |   Mapper(DB)    |  Topic(/topic)  |
 |--------|------------------|--------------|------------------|-----------------|
 | SUBSCRIBE /topic/chat/rooms/{roomId} -------------------------------------> |
@@ -39,8 +42,10 @@
 |        |                       insertChatMessage(...) -------------------> |
 |        | convertAndSend(/topic/chat/rooms/{roomId}, msg) ----------------> |
 | <-------------------------------------------------------------- MESSAGE(msg) |
+```
 
 4) Flow C — Close Deal (update + CloseEvent broadcast)
+```text
 | Client | ChatController |  ChatService  |  ChatMapper(DB)  |  Topic(/topic)  |
 |--------|----------------|--------------|------------------|-----------------|
 | POST /api/chat/rooms/{roomId}/close --->|                   |                 |
@@ -49,3 +54,4 @@
 |        |                   closeChatRoomsByBookId(...) ---->|                 |
 |        | convertAndSend(CloseEvent) ---------------------------------------> |
 | <------------------------------------------------------- MESSAGE(CloseEvent) |
+```
